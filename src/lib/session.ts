@@ -22,9 +22,12 @@ export async function getCurrentUser(): Promise<User> {
   } = await supabase.auth.getUser();
 
   if (!authUser) {
-    // Fall back to demo specialist identity when auth session is absent
-    // but env is configured — keeps local walkthrough usable.
-    return getDemoCurrentUser();
+    // Fail closed for identity: do not silently impersonate a demo specialist
+    // when Supabase is configured. Middleware should redirect unauthenticated
+    // browsers; server actions must call requireUser() for mutations.
+    throw new Error(
+      "Unauthenticated: Supabase session required when NEXT_PUBLIC_SUPABASE_URL is configured.",
+    );
   }
 
   const { data: profile } = await supabase
@@ -34,11 +37,13 @@ export async function getCurrentUser(): Promise<User> {
     .maybeSingle();
 
   if (!profile) {
+    // Least privilege: authenticated but unprovisioned users get MSL-equivalent
+    // read-oriented role, never admin/reviewer, until an admin assigns a profile.
     return {
       id: authUser.id,
       email: authUser.email ?? "unknown@medintel.local",
       fullName: authUser.email ?? "Authenticated User",
-      role: "medical_information_specialist",
+      role: "msl",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
