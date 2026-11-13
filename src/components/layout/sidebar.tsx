@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BookOpen,
+  Bot,
   BriefcaseMedical,
   LayoutDashboard,
   Settings,
@@ -37,6 +38,11 @@ const NAV_ITEMS: Array<{
     href: "/evidence",
     label: "Evidence Library",
     icon: BookOpen,
+  },
+  {
+    href: "/agents",
+    label: "AI Agent Center",
+    icon: Bot,
   },
   {
     href: "/settings",

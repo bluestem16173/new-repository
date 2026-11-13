@@ -1,0 +1,20 @@
+{
+  "note": "Icon filenames and agent identifiers. Replace PNG files in place if a higher-fidelity supplied pack is uploaded; keep ids and filenames stable.",
+  "agents": [
+    { "id": "literature-scout", "icon": "literature-scout.png" },
+    { "id": "evidence-analyst", "icon": "evidence-analyst.png" },
+    { "id": "citation-auditor", "icon": "citation-auditor.png" },
+    { "id": "medical-drafting", "icon": "medical-drafting.png" },
+    { "id": "inquiry-triage", "icon": "inquiry-triage.png" },
+    { "id": "kol-simulator", "icon": "kol-simulator.png" },
+    { "id": "scientific-examiner", "icon": "scientific-examiner.png" },
+    { "id": "coaching-advisor", "icon": "coaching-advisor.png" },
+    { "id": "scenario-builder", "icon": "scenario-builder.png" },
+    { "id": "evidence-watch", "icon": "evidence-watch.png" },
+    { "id": "pharmacovigilance-agent", "icon": "pharmacovigilance-agent.png" },
+    { "id": "case-completeness", "icon": "case-completeness.png" },
+    { "id": "bottleneck-analyst", "icon": "bottleneck-analyst.png" },
+    { "id": "leadership-briefing", "icon": "leadership-briefing.png" },
+    { "id": "protocol-intelligence", "icon": "protocol-intelligence.png" }
+  ]
+}

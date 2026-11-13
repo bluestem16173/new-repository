@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { FlaskConical } from "lucide-react";
 import { FieldMedicalSubnav } from "@/components/field-medical/fm-subnav";
 import { ScientificSection } from "@/components/scientific/scientific-section";
@@ -19,7 +20,20 @@ interface PageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export default async function SimulationsIndexPage({ searchParams }: PageProps) {
+export default function SimulationsIndexPage({ searchParams }: PageProps) {
+  return (
+    <Suspense
+      fallback={renderAppPage(
+        "Simulations",
+        <p className="p-6 text-sm text-[#17212B]/60">Loading simulations…</p>,
+      )}
+    >
+      <SimulationsIndexContent searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function SimulationsIndexContent({ searchParams }: PageProps) {
   const params = await searchParams;
   const filters = parseFmFilters(params);
   const scenarios = await listSimulationScenarios(

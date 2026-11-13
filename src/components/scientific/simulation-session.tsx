@@ -46,6 +46,7 @@ export function SimulationSessionPanel({
     <div className="space-y-6">
       <div className="flex flex-wrap gap-2">
         <Button
+          type="button"
           disabled={pending || Boolean(session)}
           className="bg-[#2563EB] text-white hover:bg-[#1D4ED8]"
           onClick={() => {
@@ -65,6 +66,7 @@ export function SimulationSessionPanel({
           Start simulation
         </Button>
         <Button
+          type="button"
           variant="outline"
           className="border-[#E5E7EB]"
           disabled={pending || !session || session.status !== "in_progress"}

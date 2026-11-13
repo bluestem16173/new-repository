@@ -53,5 +53,16 @@ test.describe("MedIntel smoke", () => {
       }),
     ).toBeVisible();
   });
+
+  test("AI Agent Center roster is reachable", async ({ page }) => {
+    await page.goto("/agents");
+    await expect(
+      page.getByRole("heading", { name: "AI Agent Center" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /KOL Simulator/i }),
+    ).toBeVisible();
+  });
 });
+
 
