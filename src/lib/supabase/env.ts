@@ -55,5 +55,6 @@ export function getSupabaseServiceRoleKey(): string | null {
 }
 
 export function getRuntimeMode(): "supabase" | "demo" {
-  return isSupabaseConfigured() ? "supabase" : "demo";
+  // Partial configuration must not silently open the synthetic runtime.
+  return getSupabaseUrl() || getSupabasePublishableKey() ? "supabase" : "demo";
 }

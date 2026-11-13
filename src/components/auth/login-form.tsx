@@ -1,8 +1,11 @@
 "use client";
 
+import { AuthCaptcha } from "@/components/auth/captcha";
+import { safeNext } from "@/lib/auth/redirect";
+
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
-import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { signInWithPasswordAction } from "@/app/actions/account";
 import { requestMagicLinkAction } from "@/app/actions/auth";
 
 type Mode = "password" | "magic";
@@ -15,6 +18,7 @@ export function LoginForm() {
 
   const [mode, setMode] = useState<Mode>("password");
   const [email, setEmail] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(urlError);
   const [info, setInfo] = useState<string | null>(null);
@@ -26,13 +30,9 @@ export function LoginForm() {
     setInfo(null);
     startTransition(async () => {
       try {
-        const supabase = createSupabaseBrowserClient();
-        const { error: signError } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password,
-        });
-        if (signError) {
-          setError(signError.message);
+        const result = await signInWithPasswordAction(email, password, nextPath, captchaToken);
+        if (!result.ok) {
+          setError(result.error);
           return;
         }
         router.replace(nextPath);
@@ -48,7 +48,7 @@ export function LoginForm() {
     setError(null);
     setInfo(null);
     startTransition(async () => {
-      const result = await requestMagicLinkAction(email);
+      const result = await requestMagicLinkAction(email, captchaToken);
       if (!result.ok) {
         setError(result.error ?? "Could not send magic link");
         return;
@@ -83,6 +83,8 @@ export function LoginForm() {
           Magic link
         </button>
       </div>
+
+      <nav aria-label="Account navigation" className="flex gap-4 text-sm text-[#2563EB]"><a href="/register">Create account</a><a href="/forgot-password">Forgot password</a></nav>
 
       <form
         onSubmit={mode === "password" ? onPasswordSubmit : onMagicSubmit}
@@ -122,8 +124,11 @@ export function LoginForm() {
               onChange={(e) => setPassword(e.target.value)}
               className="h-10 w-full rounded-lg border border-[#E5E7EB] px-3 text-sm"
             />
+            <div className="text-right"><a href="/forgot-password" className="text-sm text-[#2563EB] hover:underline">Forgot password?</a></div>
           </div>
         ) : null}
+
+        <AuthCaptcha onToken={setCaptchaToken} />
 
         {error ? (
           <p className="text-sm text-red-700" role="alert">
@@ -138,7 +143,7 @@ export function LoginForm() {
 
         <button
           type="submit"
-          disabled={pending}
+          disabled={pending || (Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) && !captchaToken)}
           className="inline-flex h-10 w-full items-center justify-center rounded-lg bg-[#2563EB] px-4 text-sm font-medium text-white hover:bg-[#1D4ED8] disabled:opacity-60"
         >
           {pending
@@ -152,14 +157,4 @@ export function LoginForm() {
       </form>
     </div>
   );
-}
-
-function safeNext(value: string | null): string {
-  if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return "/dashboard";
-  }
-  if (value.startsWith("/login") || value.startsWith("/auth")) {
-    return "/dashboard";
-  }
-  return value;
 }

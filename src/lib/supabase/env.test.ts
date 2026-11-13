@@ -58,6 +58,13 @@ describe("supabase env aliases", () => {
     expect(getRuntimeMode()).toBe("supabase");
   });
 
+  it("fails closed to configured mode when configuration is partial", () => {
+    clearKeys();
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
+    expect(getRuntimeMode()).toBe("supabase");
+    expect(getSupabasePublicConfig()).toBeNull();
+  });
+
   it("stays in demo mode when keys are missing", () => {
     clearKeys();
     expect(isSupabaseConfigured()).toBe(false);

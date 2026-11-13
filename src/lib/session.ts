@@ -14,7 +14,7 @@ export async function getCurrentUser(): Promise<User> {
 
   const supabase = await createSupabaseServerClient();
   if (!supabase) {
-    return getDemoCurrentUser();
+    throw new Error("Supabase client unavailable.");
   }
 
   const {
@@ -37,18 +37,10 @@ export async function getCurrentUser(): Promise<User> {
     .maybeSingle();
 
   if (!profile) {
-    // Least privilege: authenticated but unprovisioned users get MSL-equivalent
-    // read-oriented role, never admin/reviewer, until an admin assigns a profile.
-    // No client-side role escalation path exists.
-    return {
-      id: authUser.id,
-      email: authUser.email ?? "unknown@medintel.local",
-      fullName: authUser.email ?? "Authenticated User",
-      role: "msl",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    throw new Error("Account not provisioned. Ask an administrator to assign a profile and organization membership.");
   }
+  const membership = await getCurrentUserOrganization();
+  if (membership.error) throw new Error(membership.error);
 
   return {
     id: profile.id as string,
@@ -109,13 +101,16 @@ export async function getCurrentUserOrganization(): Promise<{
     };
   }
 
-  const { data: membership } = await supabase
+  const { data: membership, error: membershipError } = await supabase
     .from("organization_memberships")
     .select("membership_role")
     .eq("organization_id", organizationId)
     .eq("profile_id", user.id)
     .maybeSingle();
 
+  if (membershipError || !membership) {
+    return { organizationId: null, membershipRole: null, error: "Organization membership could not be verified. Contact an administrator." };
+  }
   return {
     organizationId,
     membershipRole: (membership?.membership_role as string | null) ?? "member",

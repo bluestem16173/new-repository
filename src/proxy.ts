@@ -1,8 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import { getSupabasePublicConfig } from "@/lib/supabase/env";
+import { getRuntimeMode, getSupabasePublicConfig } from "@/lib/supabase/env";
 
-const PUBLIC_PATHS = ["/login", "/auth", "/favicon.ico", "/robots.txt"];
+const PUBLIC_PATHS = ["/login", "/auth", "/favicon.ico", "/robots.txt", "/register", "/forgot-password", "/reset-password", "/onboarding"];
 
 function isPublicPath(pathname: string): boolean {
   if (
@@ -28,7 +28,7 @@ function isPublicPath(pathname: string): boolean {
  * Edge gate: when Supabase is configured, require an authenticated session.
  * Demo mode (missing public env) remains open for portfolio walkthrough.
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   if (isPublicPath(pathname)) {
     return NextResponse.next();
@@ -37,6 +37,9 @@ export async function middleware(request: NextRequest) {
   const config = getSupabasePublicConfig();
 
   if (!config) {
+    if (getRuntimeMode() === "supabase" || process.env.NODE_ENV === "production") {
+      return new NextResponse("Authentication configuration is unavailable. Contact your administrator.", { status: 503 });
+    }
     const response = NextResponse.next();
     applySecurityHeaders(response);
     response.headers.set("x-medintel-runtime-mode", "demo");
@@ -79,6 +82,17 @@ export async function middleware(request: NextRequest) {
     return redirect;
   }
 
+  const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.id).maybeSingle();
+  const { data: membership } = profile?.organization_id
+    ? await supabase.from("organization_memberships").select("id").eq("profile_id", user.id).eq("organization_id", profile.organization_id).maybeSingle()
+    : { data: null };
+  if (!membership) {
+    const target = new URL("/onboarding", request.url);
+    const pending = NextResponse.redirect(target);
+    response.cookies.getAll().forEach(cookie => pending.cookies.set(cookie));
+    applySecurityHeaders(pending);
+    return pending;
+  }
   applySecurityHeaders(response);
   response.headers.set("x-medintel-runtime-mode", "supabase");
   return response;
