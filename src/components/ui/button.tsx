@@ -43,13 +43,24 @@ function Button({
   className,
   variant = "default",
   size = "default",
+  nativeButton,
+  render,
   ...props
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+  // Base UI requires nativeButton=false when rendering a non-<button> via `render`
+  // (e.g. Next.js <Link>). Leaving the default true breaks click handlers in that case.
+  const resolvedNativeButton = nativeButton ?? (render ? false : true);
+
   return (
     <ButtonPrimitive
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
+      nativeButton={resolvedNativeButton}
+      render={render}
+      // Anchors rendered via `render={<Link />}` must keep link semantics.
+      // Base UI defaults role="button", which breaks getByRole('link') and a11y.
+      {...(render && props.role === undefined ? { role: "link" as const } : {})}
     />
   )
 }

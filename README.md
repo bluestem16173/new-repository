@@ -18,6 +18,7 @@ Independent demonstration portfolio for pharmaceutical **Medical Affairs** and *
 | MSL scientific exchange simulations | Validated (deterministic HCP teaching turns; provisional rubric) |
 | MI claim-level scientific draft review | Validated (extends inquiry detail; no auto-release) |
 | OpenAI live literature / generative HCP | Not implemented (demo uses deterministic allowlisted responses) |
+| AI Agent Center (`/agents`) | Validated (status integrity; icons in `public/agents/`) |
 
 ### Workflow states
 
@@ -135,4 +136,6 @@ npm run build
 - `/field-medical/simulations/[id]`
 - `/field-medical/analytics`
 - `/evidence`
+- `/agents`
+- `/agents/[id]`
 - `/settings`
