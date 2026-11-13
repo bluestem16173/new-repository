@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { getSupabasePublicConfig } from "@/lib/supabase/env";
 
 const PUBLIC_PATHS = ["/login", "/auth", "/favicon.ico", "/robots.txt"];
 
@@ -33,10 +34,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+  const config = getSupabasePublicConfig();
 
-  if (!url || !anonKey) {
+  if (!config) {
     const response = NextResponse.next();
     applySecurityHeaders(response);
     response.headers.set("x-medintel-runtime-mode", "demo");
@@ -47,7 +47,7 @@ export async function middleware(request: NextRequest) {
     request: { headers: request.headers },
   });
 
-  const supabase = createServerClient(url, anonKey, {
+  const supabase = createServerClient(config.url, config.anonKey, {
     cookies: {
       getAll() {
         return request.cookies.getAll();
