@@ -55,9 +55,12 @@ function Button({
     <ButtonPrimitive
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
+      {...props}
       nativeButton={resolvedNativeButton}
       render={render}
-      {...props}
+      // Anchors rendered via `render={<Link />}` must keep link semantics.
+      // Base UI defaults role="button", which breaks getByRole('link') and a11y.
+      {...(render && props.role === undefined ? { role: "link" as const } : {})}
     />
   )
 }

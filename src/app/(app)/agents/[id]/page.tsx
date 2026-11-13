@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { AgentStatusBadge } from "@/components/agents/agent-status-badge";
 import { ScientificSection } from "@/components/scientific/scientific-section";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,20 @@ export function generateStaticParams() {
   return listAgents().map((agent) => ({ id: agent.id }));
 }
 
-export default async function AgentDetailPage({ params }: PageProps) {
+export default function AgentDetailPage({ params }: PageProps) {
+  return (
+    <Suspense
+      fallback={renderAppPage(
+        "Agent",
+        <p className="p-6 text-sm text-[#17212B]/60">Loading agent…</p>,
+      )}
+    >
+      <AgentDetailContent params={params} />
+    </Suspense>
+  );
+}
+
+async function AgentDetailContent({ params }: PageProps) {
   const { id } = await params;
   const agent = getAgentById(id);
   if (!agent) notFound();
