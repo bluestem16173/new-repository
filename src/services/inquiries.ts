@@ -12,12 +12,16 @@ import {
 } from "@/domain/schemas";
 import type {
   AuditEvent,
+  InquiryStatus,
   InquiryWithRelations,
   MedicalInquiry,
   ReviewDecision,
   User,
 } from "@/domain/types";
-import { assertTransition } from "@/domain/workflow";
+import {
+  assertTransition,
+  WORKFLOW_STATUS_LABELS,
+} from "@/domain/workflow";
 import {
   getDemoStore,
   hydrateInquiry,
@@ -513,15 +517,184 @@ export async function getDashboardMetrics(): Promise<{
   approved: number;
   needsRevision: number;
 }> {
-  const inquiries = await listInquiries();
+  const overview = await getDashboardOverview();
+  return {
+    openInquiries: overview.openInquiries,
+    inMedicalReview: overview.pendingMedicalReview,
+    approved: overview.approvedResponses,
+    needsRevision: overview.needsRevision,
+  };
+}
+
+export interface WorkflowStatusCount {
+  status: InquiryStatus;
+  label: string;
+  count: number;
+}
+
+export interface DashboardOverview {
+  openInquiries: number;
+  pendingMedicalReview: number;
+  approvedResponses: number;
+  needsRevision: number;
+  /** Average days from submission to approval when review timestamps exist; otherwise null. */
+  averageReviewTurnaroundDays: number | null;
+  averageReviewTurnaroundSampleSize: number;
+  statusDistribution: WorkflowStatusCount[];
+  needsAttention: MedicalInquiry[];
+  recentInquiries: MedicalInquiry[];
+  totalInquiries: number;
+}
+
+async function listReviewDecisions(): Promise<ReviewDecision[]> {
+  if (getRuntimeMode() === "demo") {
+    return [...getDemoStore().reviews];
+  }
+
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) {
+    return [...getDemoStore().reviews];
+  }
+
+  const { data, error } = await supabase
+    .from("review_decisions")
+    .select("*")
+    .order("decided_at", { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to list review decisions: ${error.message}`);
+  }
+
+  return (data ?? []).map((row) => {
+    const review = row as Record<string, unknown>;
+    return {
+      id: review.id as string,
+      inquiryId: review.inquiry_id as string,
+      reviewerId: review.reviewer_id as string,
+      outcome: review.outcome as ReviewDecision["outcome"],
+      comments: (review.comments as string | null) ?? null,
+      decidedAt: review.decided_at as string,
+    };
+  });
+}
+
+function computeAverageReviewTurnaroundDays(
+  inquiries: MedicalInquiry[],
+  reviews: ReviewDecision[],
+): { days: number | null; sampleSize: number } {
+  const inquiryById = new Map(inquiries.map((inquiry) => [inquiry.id, inquiry]));
+  const durations: number[] = [];
+
+  for (const review of reviews) {
+    if (review.outcome !== "approved") continue;
+    const inquiry = inquiryById.get(review.inquiryId);
+    if (!inquiry?.submittedAt) continue;
+
+    const submittedMs = new Date(inquiry.submittedAt).getTime();
+    const decidedMs = new Date(review.decidedAt).getTime();
+    if (
+      Number.isNaN(submittedMs) ||
+      Number.isNaN(decidedMs) ||
+      decidedMs < submittedMs
+    ) {
+      continue;
+    }
+
+    durations.push((decidedMs - submittedMs) / (1000 * 60 * 60 * 24));
+  }
+
+  if (durations.length === 0) {
+    return { days: null, sampleSize: 0 };
+  }
+
+  const average =
+    durations.reduce((sum, value) => sum + value, 0) / durations.length;
+  return {
+    days: Math.round(average * 10) / 10,
+    sampleSize: durations.length,
+  };
+}
+
+const ATTENTION_STATUSES: InquiryStatus[] = [
+  "medical_review",
+  "needs_revision",
+  "response_drafted",
+];
+
+export async function getDashboardOverview(): Promise<DashboardOverview> {
+  const [inquiries, reviews] = await Promise.all([
+    listInquiries(),
+    listReviewDecisions(),
+  ]);
+
+  const statusOrder: InquiryStatus[] = [
+    "draft",
+    "submitted",
+    "evidence_review",
+    "response_drafted",
+    "medical_review",
+    "approved",
+    "needs_revision",
+    "rejected",
+    "closed",
+  ];
+
+  const counts = new Map<InquiryStatus, number>();
+  for (const status of statusOrder) {
+    counts.set(status, 0);
+  }
+  for (const inquiry of inquiries) {
+    counts.set(inquiry.status, (counts.get(inquiry.status) ?? 0) + 1);
+  }
+
+  const statusDistribution: WorkflowStatusCount[] = statusOrder
+    .map((status) => ({
+      status,
+      label: WORKFLOW_STATUS_LABELS[status],
+      count: counts.get(status) ?? 0,
+    }))
+    .filter((item) => item.count > 0);
+
+  const attentionPriority = (status: InquiryStatus): number => {
+    if (status === "medical_review") return 0;
+    if (status === "needs_revision") return 1;
+    if (status === "response_drafted") return 2;
+    return 3;
+  };
+
+  const needsAttention = inquiries
+    .filter((inquiry) => ATTENTION_STATUSES.includes(inquiry.status))
+    .sort((a, b) => {
+      const priorityDiff =
+        attentionPriority(a.status) - attentionPriority(b.status);
+      if (priorityDiff !== 0) return priorityDiff;
+      const aAge = new Date(a.updatedAt).getTime();
+      const bAge = new Date(b.updatedAt).getTime();
+      return aAge - bAge;
+    });
+
+  const recentInquiries = [...inquiries]
+    .sort(
+      (a, b) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+    )
+    .slice(0, 8);
+
+  const turnaround = computeAverageReviewTurnaroundDays(inquiries, reviews);
+
   return {
     openInquiries: inquiries.filter(
-      (i) => !["closed", "rejected", "approved"].includes(i.status),
+      (inquiry) =>
+        !["closed", "rejected", "approved"].includes(inquiry.status),
     ).length,
-    inMedicalReview: inquiries.filter((i) => i.status === "medical_review")
-      .length,
-    approved: inquiries.filter((i) => i.status === "approved").length,
-    needsRevision: inquiries.filter((i) => i.status === "needs_revision")
-      .length,
+    pendingMedicalReview: counts.get("medical_review") ?? 0,
+    approvedResponses: counts.get("approved") ?? 0,
+    needsRevision: counts.get("needs_revision") ?? 0,
+    averageReviewTurnaroundDays: turnaround.days,
+    averageReviewTurnaroundSampleSize: turnaround.sampleSize,
+    statusDistribution,
+    needsAttention,
+    recentInquiries,
+    totalInquiries: inquiries.length,
   };
 }
