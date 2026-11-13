@@ -11,7 +11,19 @@ test.describe("MedIntel smoke", () => {
     await expect(page.getByText("MedIntel").first()).toBeVisible();
     await expect(page.getByText(/Demo mode/i).first()).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Medical Affairs Overview" }),
+      page.getByRole("main").getByRole("heading", { name: "MedIntel" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Explore Therapeutic Areas" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Scientific Specialties" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Field Medical Excellence" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "AI Agent Center" }),
     ).toBeVisible();
     await expect(
       page.getByRole("link", { name: "New Medical Inquiry" }),
