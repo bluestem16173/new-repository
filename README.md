@@ -52,7 +52,8 @@ Open [http://localhost:3000](http://localhost:3000). Without Supabase env vars t
 | Variable | Required | Notes |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | For persistence | Project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | For persistence | Anon/public key |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | For persistence | Publishable / public API key (preferred) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | For persistence | Legacy anon key (accepted if publishable unset) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Optional admin ops | **Server-only** — never ship to the browser |
 
 If URL + anon key are missing, MedIntel uses in-memory seeded fictional data and labels it clearly as non-persisted.

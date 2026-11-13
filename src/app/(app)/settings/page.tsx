@@ -48,8 +48,10 @@ export default async function SettingsPage() {
             </p>
           ) : (
             <p className="text-muted-foreground">
-              Configure NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY,
-              and server-only SUPABASE_SERVICE_ROLE_KEY. Never expose the service
+              Configure NEXT_PUBLIC_SUPABASE_URL,
+              NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (or legacy
+              NEXT_PUBLIC_SUPABASE_ANON_KEY), and server-only
+              SUPABASE_SERVICE_ROLE_KEY. Never expose the service
               role to the browser.
             </p>
           )}

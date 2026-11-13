@@ -1,17 +1,14 @@
 import type { ReactNode } from "react";
-import { getCurrentUser } from "@/lib/session";
-import { getRuntimeMode } from "@/lib/supabase/env";
 
 /**
  * Shared data for app routes. Individual pages compose AppShell with titles.
+ * Do not read cookies/session here — that blocks static prerender when
+ * Supabase env is configured. Pages resolve the user inside their own trees.
  */
-export default async function AppGroupLayout({
+export default function AppGroupLayout({
   children,
 }: {
   children: ReactNode;
 }) {
-  // Warm session resolution early; pages still fetch for their own shell props.
-  await getCurrentUser();
-  void getRuntimeMode();
   return children;
 }
