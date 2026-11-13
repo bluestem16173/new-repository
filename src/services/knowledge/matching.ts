@@ -59,7 +59,6 @@ export function matchApprovedKnowledge(filters: KnowledgeSearchFilters): {
   noSupportedMatch: boolean;
   searchDurationMs: number;
 } {
-  const started = Date.now();
   const store = getKnowledgeStore();
   const tokens = tokenize(filters.query ?? "");
   const limit = filters.limit ?? 8;
@@ -177,7 +176,8 @@ export function matchApprovedKnowledge(filters: KnowledgeSearchFilters): {
   return {
     suggestions,
     noSupportedMatch: suggestions.length === 0,
-    searchDurationMs: Date.now() - started,
+    // Deterministic in SSR/demo; wall-clock timing recorded only when clients supply it on reuse events.
+    searchDurationMs: 0,
   };
 }
 
