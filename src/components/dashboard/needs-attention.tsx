@@ -15,26 +15,14 @@ interface NeedsAttentionProps {
   inquiries: MedicalInquiry[];
 }
 
-function formatAge(iso: string): string {
-  const updated = new Date(iso).getTime();
-  if (Number.isNaN(updated)) return "Unknown age";
-
-  const diffMs = Date.now() - updated;
-  if (diffMs < 0) {
-    return new Date(iso).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  }
-
-  const hours = Math.floor(diffMs / (1000 * 60 * 60));
-  if (hours < 24) {
-    return hours <= 1 ? "Updated ~1 hour ago" : `Updated ${hours} hours ago`;
-  }
-
-  const days = Math.floor(hours / 24);
-  return days === 1 ? "Updated 1 day ago" : `Updated ${days} days ago`;
+function formatUpdatedAt(iso: string): string {
+  const updated = new Date(iso);
+  if (Number.isNaN(updated.getTime())) return "Unknown update time";
+  return `Updated ${updated.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })}`;
 }
 
 export function NeedsAttention({ inquiries }: NeedsAttentionProps) {
@@ -75,7 +63,8 @@ export function NeedsAttention({ inquiries }: NeedsAttentionProps) {
                       {inquiry.title}
                     </p>
                     <p className="text-xs text-[#10243A]/55">
-                      {inquiry.therapeuticArea} · {formatAge(inquiry.updatedAt)}
+                      {inquiry.therapeuticArea} ·{" "}
+                      {formatUpdatedAt(inquiry.updatedAt)}
                     </p>
                   </div>
                   <ArrowRight

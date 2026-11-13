@@ -12,7 +12,12 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const NAV_ITEMS = [
+const NAV_ITEMS: Array<{
+  href: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  badge?: string;
+}> = [
   {
     href: "/dashboard",
     label: "Dashboard",
@@ -27,7 +32,6 @@ const NAV_ITEMS = [
     href: "/field-medical",
     label: "Field Medical",
     icon: Users,
-    badge: "Soon",
   },
   {
     href: "/evidence",
@@ -39,7 +43,7 @@ const NAV_ITEMS = [
     label: "Settings",
     icon: Settings,
   },
-] as const;
+];
 
 interface SidebarProps {
   className?: string;
@@ -99,7 +103,7 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
       </nav>
 
       <div className="border-t border-sidebar-border p-4 text-[11px] leading-relaxed text-muted-foreground">
-        Module 1 validated · Module 2 scaffolded. AI responses are not
+        Modules 1–2 in demo. Synthetic data only. AI responses are not
         auto-released.
       </div>
     </aside>

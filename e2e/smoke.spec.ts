@@ -24,4 +24,18 @@ test.describe("MedIntel smoke", () => {
       page.getByRole("heading", { name: "Inquiry workspace" }),
     ).toBeVisible();
   });
+
+  test("field medical excellence dashboard and roster navigate", async ({
+    page,
+  }) => {
+    await page.goto("/field-medical");
+    await expect(
+      page.getByRole("heading", { name: "Field Medical Excellence" }),
+    ).toBeVisible();
+    await expect(page.getByText(/synthetic demonstration/i).first()).toBeVisible();
+    await page.getByRole("link", { name: "Open MSL roster" }).click();
+    await expect(
+      page.getByRole("heading", { name: "MSL roster", exact: true }),
+    ).toBeVisible();
+  });
 });

@@ -13,7 +13,7 @@ Independent demonstration portfolio for pharmaceutical **Medical Affairs** and *
 | Evidence library (illustrative metadata) | Validated (sample only) |
 | PostgreSQL schema + RLS migrations | Validated (apply to your project) |
 | Demo mode with seeded synthetic data | Validated |
-| Field Medical module | Scaffold / planned |
+| Field Medical Excellence module | Validated (synthetic demo corpus) |
 | OpenAI medical response generation | Not implemented (no auto-release) |
 
 ### Workflow states
@@ -59,9 +59,13 @@ Apply migrations in order:
 
 1. `supabase/migrations/001_initial_schema.sql`
 2. `supabase/migrations/002_rls_policies.sql`
+3. `supabase/migrations/003_field_medical_schema.sql`
+4. `supabase/migrations/004_field_medical_rls.sql`
 
 Then create Auth users and matching `profiles` rows with roles:
 `admin`, `medical_reviewer`, `medical_information_specialist`, `msl`, `field_director`.
+
+Field Medical demo mode uses a deterministic in-memory corpus (64 MSLs, 8 directors, ≥500 assessments, ≥120 coaching activities) with fixed reporting reference `2026-03-15` (`America/New_York` boundaries). Seed reset is restricted to demo environments via `resetFieldMedicalSeedAction`.
 
 ## Architecture
 
@@ -105,8 +109,9 @@ npm run build
 - Demo mode state lives in the Node process and resets on restart.
 - Supabase Auth UI / invite flows are not built; connect your own auth when configuring Supabase.
 - Evidence catalog does not retrieve live literature APIs.
-- Field Medical competencies, simulations, and coaching are types/schema placeholders.
+- Field Medical KPIs are derived from synthetic seed records; Supabase FM tables exist for migration but the runtime demo adapter is in-memory until populated.
 - Citations in seed data are fictional illustrations — not real publications.
+- Coaching → later score comparisons are observational only and do not claim causation.
 
 ## Routes
 
@@ -115,5 +120,11 @@ npm run build
 - `/medical-information/inquiries/new`
 - `/medical-information/inquiries/[id]`
 - `/field-medical`
+- `/field-medical/msls`
+- `/field-medical/msls/[id]`
+- `/field-medical/competencies`
+- `/field-medical/coaching`
+- `/field-medical/coaching/[id]`
+- `/field-medical/analytics`
 - `/evidence`
 - `/settings`
