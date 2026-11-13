@@ -132,3 +132,9 @@ Review and approve migrations before production use; signup provisioning require
 - `tests/recovery-marker.test.ts`
 - `tests/runtime-boundaries.test.ts`
 - `tests/security-foundation.test.ts`
+
+## Publication and deployment attempt
+
+The user subsequently authorized deployment. Git push returned HTTP 403 (write access denied). The connected GitHub branch-creation API independently returned 403, “Resource not accessible by integration.” No remote branch or pull request was created. Repository metadata reports account-level push permission, so the integration/token's write scope must be corrected rather than assuming the account lacks repository ownership.
+
+The repository has no GitHub deployment history or homepage URL and no Vercel CLI/hosting connection was available. The current site URL and hosting service have been requested. No deployment was performed. Local changes are committed, with a patch and Git bundle preserved in the workspace as recovery artifacts. Auth email throttling was reported by the user; its live quota, reset window and SMTP configuration could not be inspected.
