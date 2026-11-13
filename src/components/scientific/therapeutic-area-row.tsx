@@ -22,18 +22,19 @@ export function TherapeuticAreaRow({ area, className }: TherapeuticAreaRowProps)
     <Link
       href={area.href}
       className={cn(
-        "group grid grid-cols-1 items-center gap-5 border-b border-[#E5E7EB] py-7 outline-none transition-colors last:border-b-0 sm:grid-cols-[160px_1fr] sm:gap-8",
+        "group grid grid-cols-1 items-center gap-5 border-b border-[#E5E7EB] py-7 outline-none transition-colors last:border-b-0 sm:grid-cols-[112px_1fr] sm:gap-8",
         "hover:bg-[#FAFBFC] focus-visible:bg-[#FAFBFC] focus-visible:ring-2 focus-visible:ring-[#2563EB]/35 focus-visible:ring-offset-2",
         className,
       )}
     >
-      <div className="relative aspect-[8/5] w-full overflow-hidden rounded-md border border-[#E5E7EB] bg-[#F8FAFC] sm:w-[160px]">
+      <div className="relative mx-auto size-[112px] overflow-hidden rounded-xl border border-[#E5E7EB] bg-white sm:mx-0">
         <Image
           src={area.imageSrc}
           alt={area.imageAlt}
-          fill
-          className="object-cover"
-          sizes="160px"
+          width={112}
+          height={112}
+          unoptimized
+          className="size-full object-contain p-2 transition-transform duration-200 group-hover:scale-[1.03]"
         />
       </div>
       <div className="min-w-0 space-y-2 pr-2">
@@ -57,8 +58,8 @@ export const THERAPEUTIC_AREA_ROWS: TherapeuticAreaContent[] = [
     title: "General Medicine",
     description:
       "Obesity, cardiovascular, and metabolic disease scientific exchange — endpoint discipline, absolute versus relative risk framing, and labeled guidance.",
-    imageSrc: "/therapeutic-areas/general-medicine.svg",
-    imageAlt: "Abstract general medicine illustration",
+    imageSrc: "/therapeutic-areas/general-medicine.png",
+    imageAlt: "Dimensional blue and teal therapeutic antibody illustration",
     href: "/field-medical?ta=general_medicine",
   },
   {
@@ -66,8 +67,8 @@ export const THERAPEUTIC_AREA_ROWS: TherapeuticAreaContent[] = [
     title: "Rare Disease",
     description:
       "Specialized populations, diagnostic complexity, and expert engagement where evidence is sparse and uncertainty must be stated clearly.",
-    imageSrc: "/therapeutic-areas/rare-disease.svg",
-    imageAlt: "Abstract rare disease illustration",
+    imageSrc: "/therapeutic-areas/rare-disease.png",
+    imageAlt: "Dimensional violet and blue DNA double helix illustration",
     href: "/field-medical?ta=rare_disease",
   },
   {
@@ -75,8 +76,8 @@ export const THERAPEUTIC_AREA_ROWS: TherapeuticAreaContent[] = [
     title: "Inflammation",
     description:
       "Evolving treatments, comparative evidence, and long-term disease management with careful safety discussion boundaries.",
-    imageSrc: "/therapeutic-areas/inflammation.svg",
-    imageAlt: "Abstract inflammation illustration",
+    imageSrc: "/therapeutic-areas/immunology.png",
+    imageAlt: "Dimensional immune cell with cytokine signaling illustration",
     href: "/field-medical?ta=inflammation",
   },
   {
@@ -84,8 +85,8 @@ export const THERAPEUTIC_AREA_ROWS: TherapeuticAreaContent[] = [
     title: "Oncology",
     description:
       "Rapid scientific advances, biomarker-selected populations, and complex scientific exchange under high evidence velocity.",
-    imageSrc: "/therapeutic-areas/oncology.svg",
-    imageAlt: "Abstract oncology illustration",
+    imageSrc: "/therapeutic-areas/oncology.png",
+    imageAlt: "Dimensional purple and blue cancer cell illustration",
     href: "/field-medical?ta=oncology",
   },
 ];
