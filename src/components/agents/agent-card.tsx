@@ -15,13 +15,14 @@ export function AgentCard({ agent }: { agent: MedIntelAgent }) {
         "hover:border-[#2563EB]/35 hover:bg-[#FAFBFC] focus-visible:ring-2 focus-visible:ring-[#2563EB]/40 focus-visible:ring-offset-2",
       )}
     >
-      <div className="relative mx-auto mb-4 aspect-[4/3] w-full max-w-[168px] overflow-hidden rounded-md bg-white">
+      <div className="mx-auto mb-4 flex aspect-[4/3] w-full max-w-[168px] items-center justify-center overflow-hidden rounded-md bg-white">
         <Image
           src={agent.icon}
           alt=""
-          fill
-          className="object-contain transition-transform duration-200 group-hover:scale-[1.03]"
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 168px"
+          width={200}
+          height={140}
+          unoptimized
+          className="h-full w-full object-contain transition-transform duration-200 group-hover:scale-[1.03]"
         />
       </div>
       <div className="flex flex-1 flex-col gap-2">

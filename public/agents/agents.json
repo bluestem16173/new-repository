@@ -3,63 +3,63 @@
   "agents": [
     {
       "id": "literature-scout",
-      "icon": "literature-scout.png"
+      "icon": "literature-scout.v2.png"
     },
     {
       "id": "evidence-analyst",
-      "icon": "evidence-analyst.png"
+      "icon": "evidence-analyst.v2.png"
     },
     {
       "id": "citation-auditor",
-      "icon": "citation-auditor.png"
+      "icon": "citation-auditor.v2.png"
     },
     {
       "id": "medical-drafting",
-      "icon": "medical-drafting.png"
+      "icon": "medical-drafting.v2.png"
     },
     {
       "id": "inquiry-triage",
-      "icon": "inquiry-triage.png"
+      "icon": "inquiry-triage.v2.png"
     },
     {
       "id": "kol-simulator",
-      "icon": "kol-simulator.png"
+      "icon": "kol-simulator.v2.png"
     },
     {
       "id": "scientific-examiner",
-      "icon": "scientific-examiner.png"
+      "icon": "scientific-examiner.v2.png"
     },
     {
       "id": "coaching-advisor",
-      "icon": "coaching-advisor.png"
+      "icon": "coaching-advisor.v2.png"
     },
     {
       "id": "scenario-builder",
-      "icon": "scenario-builder.png"
+      "icon": "scenario-builder.v2.png"
     },
     {
       "id": "evidence-watch",
-      "icon": "evidence-watch.png"
+      "icon": "evidence-watch.v2.png"
     },
     {
       "id": "pharmacovigilance",
-      "icon": "pharmacovigilance.png"
+      "icon": "pharmacovigilance.v2.png"
     },
     {
       "id": "case-completeness",
-      "icon": "case-completeness.png"
+      "icon": "case-completeness.v2.png"
     },
     {
       "id": "bottleneck-analyst",
-      "icon": "bottleneck-analyst.png"
+      "icon": "bottleneck-analyst.v2.png"
     },
     {
       "id": "leadership-briefing",
-      "icon": "leadership-briefing.png"
+      "icon": "leadership-briefing.v2.png"
     },
     {
       "id": "protocol-intelligence",
-      "icon": "protocol-intelligence.png"
+      "icon": "protocol-intelligence.v2.png"
     }
   ]
 }

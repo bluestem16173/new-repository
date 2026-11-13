@@ -47,14 +47,15 @@ async function AgentDetailContent({ params }: PageProps) {
     agent.name,
     <div className="mx-auto w-full max-w-[960px] space-y-10 bg-white px-1 py-2">
       <header className="flex flex-col gap-6 sm:flex-row sm:items-start">
-        <div className="relative mx-auto aspect-[4/3] w-full max-w-[240px] shrink-0 overflow-hidden rounded-md bg-white sm:mx-0">
+        <div className="mx-auto flex aspect-[4/3] w-full max-w-[240px] shrink-0 items-center justify-center overflow-hidden rounded-md bg-white sm:mx-0">
           <Image
             src={agent.icon}
             alt=""
-            fill
-            className="object-contain"
-            sizes="240px"
+            width={240}
+            height={168}
+            unoptimized
             priority
+            className="h-full w-full object-contain"
           />
         </div>
         <div className="min-w-0 flex-1 space-y-3">
