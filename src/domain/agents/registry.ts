@@ -324,14 +324,14 @@ export const MEDINTEL_AGENTS: MedIntelAgent[] = [
     ],
   },
   {
-    id: "pharmacovigilance-agent",
+    id: "pharmacovigilance",
     name: "Pharmacovigilance Agent",
     description:
       "Detects safety-event language and routes content for human assessment — never autonomous reporting.",
-    icon: iconFor("pharmacovigilance-agent"),
+    icon: iconFor("pharmacovigilance"),
     category: "safety",
     status: "in_development",
-    route: "/agents/pharmacovigilance-agent",
+    route: "/agents/pharmacovigilance",
     workflowHref: "/medical-information",
     responsibilities: [
       "Flag potential safety-event language in inquiries/drafts",
