@@ -6,11 +6,11 @@ import {
 } from "@/domain/agents/registry";
 
 describe("MedIntel agent registry", () => {
-  it("exposes exactly 15 agents with unique ids and icon paths", () => {
+  it("exposes exactly 16 agents with unique ids and icon paths", () => {
     const agents = listAgents();
-    expect(agents).toHaveLength(15);
+    expect(agents).toHaveLength(16);
     const ids = new Set(agents.map((a) => a.id));
-    expect(ids.size).toBe(15);
+    expect(ids.size).toBe(16);
     for (const agent of agents) {
       expect(agent.icon.startsWith("/agents/")).toBe(true);
       expect(agent.icon.endsWith(".png")).toBe(true);

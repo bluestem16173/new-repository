@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { WorkflowActions } from "@/components/inquiries/workflow-actions";
+import { KnowledgeMatchPanel } from "@/components/knowledge/knowledge-match-panel";
 import { ClaimReviewPanel } from "@/components/scientific/claim-review-panel";
 import { ScientificSection } from "@/components/scientific/scientific-section";
 import { StatusIndicator } from "@/components/shared/status-indicator";
@@ -21,6 +22,7 @@ import { SI_EVIDENCE_NOTICE } from "@/lib/demo/scientific-evidence-seed";
 import { renderAppPage } from "@/lib/page";
 import { getCurrentUser } from "@/lib/session";
 import { getInquiryById } from "@/services/inquiries";
+import { matchApprovedKnowledge } from "@/services/knowledge/matching";
 import { getRuntimeMode } from "@/lib/supabase/env";
 import { getDraftsForInquiry } from "@/services/scientific/medical-response";
 import { retrieveEvidence } from "@/services/scientific/retrieval";
@@ -45,6 +47,13 @@ export default async function InquiryDetailPage({ params }: PageProps) {
   const retrieval = retrieveEvidence({
     query: inquiry.questionText,
     limit: 4,
+  });
+  const knowledgeMatches = matchApprovedKnowledge({
+    query: `${inquiry.title} ${inquiry.questionText} ${inquiry.productName} ${inquiry.therapeuticArea}`,
+    therapeuticArea: inquiry.therapeuticArea,
+    productName: inquiry.productName,
+    status: "approved",
+    limit: 3,
   });
 
   return renderAppPage(
@@ -133,6 +142,13 @@ export default async function InquiryDetailPage({ params }: PageProps) {
               </dl>
             </CardContent>
           </Card>
+
+          <KnowledgeMatchPanel
+            query={inquiry.questionText}
+            suggestions={knowledgeMatches.suggestions}
+            noSupportedMatch={knowledgeMatches.noSupportedMatch}
+            inquiryId={inquiry.id}
+          />
 
           <Card className="shadow-none border-[#E5E7EB]">
             <CardHeader>
