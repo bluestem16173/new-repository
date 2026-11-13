@@ -43,7 +43,11 @@ export function Header({ title, user, runtimeMode }: HeaderProps) {
           <SheetHeader className="sr-only">
             <SheetTitle>Navigation</SheetTitle>
           </SheetHeader>
-          <Sidebar onNavigate={() => setOpen(false)} className="w-full border-0" />
+          <Sidebar
+            onNavigate={() => setOpen(false)}
+            className="w-full border-0"
+            role={user.role}
+          />
         </SheetContent>
       </Sheet>
 

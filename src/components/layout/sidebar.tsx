@@ -12,6 +12,7 @@ import {
   Stethoscope,
   Users,
 } from "lucide-react";
+import type { UserRole } from "@/domain/types";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS: Array<{
@@ -19,6 +20,7 @@ const NAV_ITEMS: Array<{
   label: string;
   icon: typeof LayoutDashboard;
   badge?: string;
+  adminOnly?: boolean;
 }> = [
   {
     href: "/dashboard",
@@ -55,15 +57,26 @@ const NAV_ITEMS: Array<{
     label: "Settings",
     icon: Settings,
   },
+  {
+    href: "/admin/security",
+    label: "Security status",
+    icon: Settings,
+    badge: "Admin",
+    adminOnly: true,
+  },
 ];
 
 interface SidebarProps {
   className?: string;
   onNavigate?: () => void;
+  role?: UserRole;
 }
 
-export function Sidebar({ className, onNavigate }: SidebarProps) {
+export function Sidebar({ className, onNavigate, role }: SidebarProps) {
   const pathname = usePathname();
+  const items = NAV_ITEMS.filter(
+    (item) => !item.adminOnly || role === "admin",
+  );
 
   return (
     <aside
@@ -85,7 +98,7 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
       </div>
 
       <nav className="flex-1 space-y-1 p-3" aria-label="Primary">
-        {NAV_ITEMS.map((item) => {
+        {items.map((item) => {
           const active =
             pathname === item.href || pathname.startsWith(`${item.href}/`);
           const Icon = item.icon;

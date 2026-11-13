@@ -19,7 +19,7 @@ export function AppShell({
 }: AppShellProps) {
   return (
     <div className="flex min-h-screen bg-[oklch(0.985_0.005_210)]">
-      <Sidebar className="hidden lg:flex" />
+      <Sidebar className="hidden lg:flex" role={user.role} />
       <div className="flex min-w-0 flex-1 flex-col">
         <DisclaimerBanner />
         <Header title={title} user={user} runtimeMode={runtimeMode} />
