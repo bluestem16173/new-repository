@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+import { Suspense } from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { DataTable, type DataTableColumn } from "@/components/shared/data-table";
@@ -10,7 +12,8 @@ import { listInquiries } from "@/services/inquiries";
 import { getRuntimeMode } from "@/lib/supabase/env";
 import { DEMO_MODE_NOTICE } from "@/lib/demo/seed";
 
-export default async function MedicalInformationPage() {
+async function MedicalInformationPageContent() {
+  await connection();
   const inquiries = await listInquiries();
   const mode = getRuntimeMode();
 
@@ -97,4 +100,8 @@ export default async function MedicalInformationPage() {
       />
     </div>,
   );
+}
+
+export default function MedicalInformationPage() {
+  return <Suspense fallback={<p className="p-6 text-sm text-slate-600">Loading workspace…</p>}><MedicalInformationPageContent /></Suspense>;
 }

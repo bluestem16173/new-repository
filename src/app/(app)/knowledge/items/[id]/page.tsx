@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { KnowledgeReuseActions } from "@/components/knowledge/reuse-actions";
@@ -28,7 +30,8 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function KnowledgeItemDetailPage({ params }: PageProps) {
+async function KnowledgeItemDetailPageContent({ params }: PageProps) {
+  await connection();
   const { id } = await params;
   const [item, user] = await Promise.all([
     Promise.resolve(getKnowledgeItemById(id)),
@@ -216,4 +219,8 @@ export default async function KnowledgeItemDetailPage({ params }: PageProps) {
       </ScientificSection>
     </div>,
   );
+}
+
+export default function KnowledgeItemDetailPage(props: PageProps) {
+  return <Suspense fallback={<p className="p-6 text-sm text-slate-600">Loading workspace…</p>}><KnowledgeItemDetailPageContent {...props} /></Suspense>;
 }

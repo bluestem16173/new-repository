@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import Link from "next/link";
 import { Suspense } from "react";
 import { FieldMedicalSubnav } from "@/components/field-medical/fm-subnav";
@@ -28,7 +29,8 @@ const STATUS_STYLES = {
   not_applicable: "bg-transparent text-[#10243A]/30",
 } as const;
 
-export default async function CompetenciesPage({ searchParams }: PageProps) {
+async function CompetenciesPageContent({ searchParams }: PageProps) {
+  await connection();
   const params = await searchParams;
   const filters = parseFmFilters(params);
   const matrix = await getCompetencyMatrix(filters.therapeuticArea);
@@ -116,4 +118,8 @@ export default async function CompetenciesPage({ searchParams }: PageProps) {
       </Card>
     </div>,
   );
+}
+
+export default function CompetenciesPage(props: PageProps) {
+  return <Suspense fallback={<p className="p-6 text-sm text-slate-600">Loading workspace…</p>}><CompetenciesPageContent {...props} /></Suspense>;
 }

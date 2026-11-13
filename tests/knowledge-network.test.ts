@@ -69,6 +69,12 @@ describe("Scientific Knowledge Network", () => {
     expect(suggestions[0].applicabilityWarnings.length).toBeGreaterThan(0);
   });
 
+  it("returns a schema-valid supported-match result for seeded knowledge", () => {
+    const result = runKnowledgeMatchingAgent({ query: "GLP-1 cardiorenal", actorProfileId: msl.id });
+    expect(result.no_supported_match).toBe(false);
+    expect(result.knowledge_item_id).not.toBeNull();
+  });
+
   it("returns explicit no-supported-match for unrelated queries", () => {
     const result = runKnowledgeMatchingAgent({
       query: "xyzzy unrelated quantum pineapple protocol",
@@ -113,9 +119,10 @@ describe("Scientific Knowledge Network", () => {
       {
         knowledgeItemId: item.id,
         decision: "accepted",
+        inquiryId: "d2222222-2222-4222-8222-222222222202",
         verificationNotes: "Verified labeled scope for internal prep.",
       },
-      msl,
+      specialist,
     );
     expect(reuse.decision).toBe("accepted");
     expect(

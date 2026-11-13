@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -34,6 +35,7 @@ export default function AgentDetailPage({ params }: PageProps) {
 }
 
 async function AgentDetailContent({ params }: PageProps) {
+  await connection();
   const { id } = await params;
   const agent = getAgentById(id);
   if (!agent) notFound();

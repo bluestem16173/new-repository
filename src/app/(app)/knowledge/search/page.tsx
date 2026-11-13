@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import Link from "next/link";
 import { Suspense } from "react";
 import { KnowledgeItemCard } from "@/components/knowledge/knowledge-item-card";
@@ -31,6 +32,7 @@ export default function KnowledgeSearchPage({ searchParams }: PageProps) {
 }
 
 async function KnowledgeSearchContent({ searchParams }: PageProps) {
+  await connection();
   const params = await searchParams;
   const query = first(params.q);
   const therapeuticArea = first(params.ta);

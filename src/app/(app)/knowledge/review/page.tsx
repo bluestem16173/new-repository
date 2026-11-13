@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+import { Suspense } from "react";
 import { KnowledgeItemCard } from "@/components/knowledge/knowledge-item-card";
 import { KnowledgeReviewActions } from "@/components/knowledge/review-actions";
 import { KnowledgeSubnav } from "@/components/knowledge/knowledge-subnav";
@@ -6,7 +8,8 @@ import { renderAppPage } from "@/lib/page";
 import { getCurrentUser } from "@/lib/session";
 import { listKnowledgeItems } from "@/services/knowledge/items";
 
-export default async function KnowledgeReviewPage() {
+async function KnowledgeReviewPageContent() {
+  await connection();
   const user = await getCurrentUser();
   const pending = listKnowledgeItems({
     status: "pending_review",
@@ -57,4 +60,8 @@ export default async function KnowledgeReviewPage() {
       )}
     </div>,
   );
+}
+
+export default function KnowledgeReviewPage() {
+  return <Suspense fallback={<p className="p-6 text-sm text-slate-600">Loading workspace…</p>}><KnowledgeReviewPageContent /></Suspense>;
 }

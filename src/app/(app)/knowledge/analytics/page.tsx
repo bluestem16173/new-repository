@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+import { Suspense } from "react";
 import Link from "next/link";
 import { KnowledgeSubnav } from "@/components/knowledge/knowledge-subnav";
 import { RoiScenarioControls } from "@/components/knowledge/roi-scenario-controls";
@@ -10,7 +12,8 @@ function formatRate(value: number | null): string {
   return `${(value * 100).toFixed(1)}%`;
 }
 
-export default async function KnowledgeAnalyticsPage() {
+async function KnowledgeAnalyticsPageContent() {
+  await connection();
   const analytics = getKnowledgeAnalytics();
   const { kpis } = analytics;
 
@@ -155,4 +158,8 @@ export default async function KnowledgeAnalyticsPage() {
       </ScientificSection>
     </div>,
   );
+}
+
+export default function KnowledgeAnalyticsPage() {
+  return <Suspense fallback={<p className="p-6 text-sm text-slate-600">Loading workspace…</p>}><KnowledgeAnalyticsPageContent /></Suspense>;
 }

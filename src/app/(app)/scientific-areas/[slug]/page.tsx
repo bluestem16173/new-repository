@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -19,11 +21,12 @@ export async function generateStaticParams() {
   return slugs;
 }
 
-export default async function ScientificAreaDetailPage({
+async function ScientificAreaDetailPageContent({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  await connection();
   const { slug } = await params;
   const category = getScientificCategoryBySlug(slug);
   if (!category) notFound();
@@ -205,4 +208,8 @@ export default async function ScientificAreaDetailPage({
       </ScientificSection>
     </div>,
   );
+}
+
+export default function ScientificAreaDetailPage(props: { params: Promise<{ slug: string }> }) {
+  return <Suspense fallback={<p className="p-6 text-sm text-slate-600">Loading workspace…</p>}><ScientificAreaDetailPageContent {...props} /></Suspense>;
 }

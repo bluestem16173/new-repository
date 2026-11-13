@@ -242,6 +242,7 @@ export function approveKnowledgeItem(
   const store = getKnowledgeStore();
   const item = store.items.find((row) => row.id === knowledgeItemId);
   if (!item) throw new Error("Knowledge item not found.");
+  if (item.ownerProfileId === user.id) throw new Error("Authors cannot approve their own scientific responses.");
   if (item.status === "approved") return item;
 
   const now = new Date().toISOString();

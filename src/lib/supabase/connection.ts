@@ -1,7 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import {
   getSupabasePublicConfig,
-  getSupabaseServiceRoleKey,
 } from "@/lib/supabase/env";
 
 export type SupabaseConnectionCheck = {
@@ -96,8 +95,7 @@ export async function checkSupabaseConnection(): Promise<SupabaseConnectionCheck
     };
   }
 
-  const serviceKey = getSupabaseServiceRoleKey();
-  const client = createClient(config.url, serviceKey ?? config.anonKey, {
+  const client = createClient(config.url, config.anonKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 

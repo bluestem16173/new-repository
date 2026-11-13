@@ -1,3 +1,4 @@
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { randomUUID } from "crypto";
 import { getRuntimeMode } from "@/lib/supabase/env";
 
@@ -74,11 +75,24 @@ export async function recordSecurityAuditEvent(
     createdAt: new Date().toISOString(),
   };
 
-  getStore().unshift(event);
-
-  // Supabase write path intentionally deferred until authenticated admin client
-  // usage is narrowly scoped; demo/default runtime uses in-memory evidence.
-  void getRuntimeMode();
+  if (getRuntimeMode() === "demo") {
+    getStore().unshift(event);
+  } else {
+    const client = await createSupabaseServerClient();
+    if (!client) throw new Error("Security audit client unavailable.");
+    if (!event.organizationId && event.actorId) {
+      const { data: profile, error: profileError } = await client.from("profiles").select("organization_id").eq("id", event.actorId).maybeSingle();
+      if (profileError) throw new Error("Security audit organization could not be verified.");
+      event.organizationId = profile?.organization_id ?? null;
+    }
+    const { error } = await client.from("security_audit_events").insert({
+      id: event.id, actor_id: event.actorId, organization_id: event.organizationId,
+      event_type: event.eventType, resource_type: event.resourceType,
+      resource_id: event.resourceId, outcome: event.outcome,
+      metadata: event.metadata, created_at: event.createdAt,
+    });
+    if (error) throw new Error("Security audit could not be persisted.");
+  }
 
   return event;
 }

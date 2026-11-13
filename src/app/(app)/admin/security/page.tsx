@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ScientificSection } from "@/components/scientific/scientific-section";
@@ -23,7 +25,8 @@ function statusClass(status: SecurityCheckStatus): string {
   }
 }
 
-export default async function AdminSecurityPage() {
+async function AdminSecurityPageContent() {
+  await connection();
   const user = await getCurrentUser();
   if (user.role !== "admin") {
     redirect("/dashboard");
@@ -126,4 +129,8 @@ export default async function AdminSecurityPage() {
       </p>
     </div>,
   );
+}
+
+export default function AdminSecurityPage() {
+  return <Suspense fallback={<p className="p-6 text-sm text-slate-600">Loading workspace…</p>}><AdminSecurityPageContent /></Suspense>;
 }

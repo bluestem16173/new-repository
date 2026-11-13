@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+import { Suspense } from "react";
 import { AgentCard } from "@/components/agents/agent-card";
 import { ScientificSection } from "@/components/scientific/scientific-section";
 import {
@@ -7,7 +9,8 @@ import {
 } from "@/domain/agents/registry";
 import { renderAppPage } from "@/lib/page";
 
-export default async function AgentsCenterPage() {
+async function AgentsCenterPageContent() {
+  await connection();
   const agents = listAgents();
   const counts = agents.reduce(
     (acc, agent) => {
@@ -61,4 +64,8 @@ export default async function AgentsCenterPage() {
       </ScientificSection>
     </div>,
   );
+}
+
+export default function AgentsCenterPage() {
+  return <Suspense fallback={<p className="p-6 text-sm text-slate-600">Loading workspace…</p>}><AgentsCenterPageContent /></Suspense>;
 }

@@ -112,6 +112,10 @@ export async function authorizeAiGatewayRequest(
     }
   }
 
+  if (mode !== "demo" || model !== "demo-synthetic") {
+    return { ok: false, reason: "Live AI execution is unavailable until authenticated durable budgets, provider execution, and usage accounting are implemented." };
+  }
+
   const usage = getUsage();
   const userKey = parsed.data.userId ?? "anonymous-demo";
   const userCount = usage.byUser[userKey] ?? 0;

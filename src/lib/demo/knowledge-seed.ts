@@ -1,3 +1,4 @@
+import { assertSyntheticRuntime } from "@/lib/demo/guard";
 import type {
   KnowledgeEvidenceLink,
   KnowledgeItem,
@@ -33,10 +34,10 @@ const T2 = "2026-10-03T11:15:00.000Z";
 const T3 = "2026-10-04T09:40:00.000Z";
 
 function createKnowledgeStore(): KnowledgeStore {
-  const itemAId = "kn-item-0001-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
-  const itemPendingId = "kn-item-0002-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
-  const versionAId = "kn-ver-0001-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
-  const matchBId = "kn-match-0001-cccc-4ccc-8ccc-cccccccccccc";
+  const itemAId = "0394271c-df2e-5175-b5d6-bd09965f7b8c";
+  const itemPendingId = "29a87293-1186-5b03-b144-f10792563be8";
+  const versionAId = "0a4d318f-72ae-5322-a0fe-4c8cda5c779b";
+  const matchBId = "4fce1a40-a932-5b98-bdef-013772530ab2";
 
   const items: KnowledgeItem[] = [
     {
@@ -107,7 +108,7 @@ function createKnowledgeStore(): KnowledgeStore {
       createdAt: T0,
     },
     {
-      id: "kn-ver-0002-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      id: "b12d255e-4bce-58b1-a4a6-e073a825d5f4",
       knowledgeItemId: itemPendingId,
       versionNumber: 1,
       answerText:
@@ -123,7 +124,7 @@ function createKnowledgeStore(): KnowledgeStore {
 
   const evidenceLinks: KnowledgeEvidenceLink[] = [
     {
-      id: "kn-ev-0001-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      id: "b297faea-6e09-54a0-aed3-f7c63fa000ac",
       knowledgeItemId: itemAId,
       versionNumber: 1,
       siDocumentId: "si-doc-0001-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
@@ -166,7 +167,7 @@ function createKnowledgeStore(): KnowledgeStore {
 
   const reuseEvents: KnowledgeReuseEvent[] = [
     {
-      id: "kn-reuse-0001-dddd-4ddd-8ddd-dddddddddddd",
+      id: "7b0208f4-e221-5b7c-bf33-9508adcc4756",
       knowledgeItemId: itemAId,
       matchId: matchBId,
       inquiryId: null,
@@ -183,7 +184,7 @@ function createKnowledgeStore(): KnowledgeStore {
 
   const reviewEvents: KnowledgeReviewEvent[] = [
     {
-      id: "kn-rev-0001-eeee-4eee-8eee-eeeeeeeeeeee",
+      id: "aed87c92-f31e-52e3-86c2-9b422b6ce2b3",
       knowledgeItemId: itemAId,
       versionNumber: 1,
       decision: "submitted",
@@ -192,7 +193,7 @@ function createKnowledgeStore(): KnowledgeStore {
       createdAt: T0,
     },
     {
-      id: "kn-rev-0002-ffff-4fff-8fff-ffffffffffff",
+      id: "1b6fc041-2c0c-597a-8577-9c9cd8584728",
       knowledgeItemId: itemAId,
       versionNumber: 1,
       decision: "approved",
@@ -204,7 +205,7 @@ function createKnowledgeStore(): KnowledgeStore {
 
   const searchEvents: KnowledgeSearchEvent[] = [
     {
-      id: "kn-search-0001-1111-4111-8111-111111111111",
+      id: "547e558f-71be-5247-a171-fd9cd2b16b04",
       queryText: "GLP-1 primary cardiorenal endpoint obesity",
       therapeuticArea: "General Medicine",
       productName: "MediMet GLP-1 (synthetic label)",
@@ -217,7 +218,7 @@ function createKnowledgeStore(): KnowledgeStore {
   ];
 
   const assumptions: KnowledgeValueAssumptions = {
-    id: "kn-assume-0001-2222-4222-8222-222222222222",
+    id: "505e7f57-d629-5524-97c0-4db0b4ff45e7",
     label: "Default leadership scenario",
     mslWorkforceSize: 50,
     monthlyResearchInquiriesPerMsl: 8,
@@ -244,6 +245,7 @@ function createKnowledgeStore(): KnowledgeStore {
 }
 
 export function getKnowledgeStore(): KnowledgeStore {
+  assertSyntheticRuntime();
   if (!globalThis.__medintelKnowledgeStore) {
     globalThis.__medintelKnowledgeStore = createKnowledgeStore();
   }

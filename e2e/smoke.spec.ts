@@ -23,7 +23,7 @@ test.describe("MedIntel smoke", () => {
       page.getByRole("link", { name: "Field Medical Excellence" }),
     ).toBeVisible();
     await expect(
-      page.getByRole("link", { name: "AI Agent Center" }),
+      page.getByRole("navigation", { name: "Primary", exact: true }).getByRole("link", { name: "AI Agent Center" }),
     ).toBeVisible();
     await expect(
       page.getByRole("link", { name: "New Medical Inquiry" }),
@@ -81,7 +81,7 @@ test.describe("MedIntel smoke", () => {
   }) => {
     await page.goto("/knowledge");
     await expect(
-      page.getByRole("heading", { name: "Scientific Knowledge Network" }),
+      page.getByRole("main").getByRole("heading", { name: "Scientific Knowledge Network" }),
     ).toBeVisible();
     await page.goto("/knowledge/search?q=GLP-1+cardiorenal");
     await expect(

@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+import { Suspense } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -16,7 +18,8 @@ const TRUST_LABELS = {
   planned: "Planned capability",
 } as const;
 
-export default async function EvidencePage() {
+async function EvidencePageContent() {
+  await connection();
   const documents = await listEvidenceDocuments();
 
   return renderAppPage(
@@ -82,4 +85,8 @@ export default async function EvidencePage() {
       )}
     </div>,
   );
+}
+
+export default function EvidencePage() {
+  return <Suspense fallback={<p className="p-6 text-sm text-slate-600">Loading workspace…</p>}><EvidencePageContent /></Suspense>;
 }

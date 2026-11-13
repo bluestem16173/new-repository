@@ -1,3 +1,4 @@
+import { getDemoStore } from "@/lib/demo/seed";
 import { randomUUID } from "crypto";
 import { canRecordKnowledgeReuse } from "@/domain/knowledge/authorization";
 import type { RecordReuseInput } from "@/domain/knowledge/schemas";
@@ -25,6 +26,32 @@ export function recordKnowledgeReuse(
   if (!item) throw new Error("Knowledge item not found.");
   if (item.status !== "approved" && input.decision === "accepted") {
     throw new Error("Only approved knowledge items can be accepted for reuse.");
+  }
+
+  if (input.decision === "accepted" || input.decision === "adapted") {
+    if (item.status !== "approved" || item.currencyStatus !== "current") {
+      throw new Error("Reuse requires approved, current knowledge.");
+    }
+    if (!input.inquiryId || !input.verificationNotes?.trim()) {
+      throw new Error("An inquiry and applicability verification notes are required for reuse.");
+    }
+    const existing = getKnowledgeStore().reuseEvents.find((event) =>
+      event.inquiryId === input.inquiryId && event.knowledgeItemId === item.id &&
+      (event.decision === "accepted" || event.decision === "adapted"));
+    if (existing) throw new Error("Reuse has already been recorded for this inquiry and knowledge item.");
+  }
+
+  if (input.inquiryId) {
+    const inquiry = getDemoStore().inquiries.find(row => row.id === input.inquiryId);
+    if (!inquiry || (user.role === "msl" && inquiry.createdById !== user.id && inquiry.assignedToId !== user.id)) {
+      throw new Error("Inquiry not found or access denied.");
+    }
+  }
+  if (input.matchId) {
+    const match = getKnowledgeStore().matches.find(row => row.id === input.matchId);
+    if (!match || match.knowledgeItemId !== item.id || match.inquiryId !== (input.inquiryId ?? null)) {
+      throw new Error("Match does not belong to this inquiry and knowledge item.");
+    }
   }
 
   const event: KnowledgeReuseEvent = {

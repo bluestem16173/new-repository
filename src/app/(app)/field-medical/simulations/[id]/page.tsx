@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -20,7 +22,8 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function SimulationDetailPage({ params }: PageProps) {
+async function SimulationDetailPageContent({ params }: PageProps) {
+  await connection();
   const { id } = await params;
   const [scenario, user] = await Promise.all([
     getSimulationScenario(id),
@@ -134,4 +137,8 @@ export default async function SimulationDetailPage({ params }: PageProps) {
       </ScientificSection>
     </div>,
   );
+}
+
+export default function SimulationDetailPage(props: PageProps) {
+  return <Suspense fallback={<p className="p-6 text-sm text-slate-600">Loading workspace…</p>}><SimulationDetailPageContent {...props} /></Suspense>;
 }

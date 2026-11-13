@@ -1,3 +1,4 @@
+import { assertSyntheticRuntime } from "@/lib/demo/guard";
 import type {
   ProvisionalEvaluation,
   ResponseDraft,
@@ -241,6 +242,7 @@ function createScientificStore(): ScientificStore {
 }
 
 export function getScientificStore(): ScientificStore {
+  assertSyntheticRuntime();
   if (!globalThis.__medintelScientificStore) {
     globalThis.__medintelScientificStore = createScientificStore();
   }

@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+import { Suspense } from "react";
 import Link from "next/link";
 import { FieldMedicalSubnav } from "@/components/field-medical/fm-subnav";
 import { CreateCoachingPlanForm } from "@/components/field-medical/coaching-forms";
@@ -14,7 +16,8 @@ import { renderAppPage } from "@/lib/page";
 import { listCoachingWorkspace } from "@/services/field-medical/analytics";
 import { defaultAnalyticsFilters } from "@/domain/field-medical/metrics";
 
-export default async function CoachingPage() {
+async function CoachingPageContent() {
+  await connection();
   const workspace = await listCoachingWorkspace();
   const asOf = Date.parse(defaultAnalyticsFilters().asOf);
 
@@ -106,4 +109,8 @@ export default async function CoachingPage() {
       </div>
     </div>,
   );
+}
+
+export default function CoachingPage() {
+  return <Suspense fallback={<p className="p-6 text-sm text-slate-600">Loading workspace…</p>}><CoachingPageContent /></Suspense>;
 }

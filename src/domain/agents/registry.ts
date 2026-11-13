@@ -497,9 +497,9 @@ for (const agent of MEDINTEL_AGENTS) {
 }
 
 export const AGENT_STATUS_LABELS: Record<AgentStatus, string> = {
-  active: "Active",
-  in_development: "In Development",
-  planned: "Planned",
+  active: "Demonstration only",
+  in_development: "Configured but unavailable",
+  planned: "Not implemented",
 };
 
 export const AGENT_CATEGORY_LABELS: Record<AgentCategory, string> = {

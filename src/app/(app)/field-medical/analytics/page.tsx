@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import Link from "next/link";
 import { Suspense } from "react";
 import { FieldMedicalSubnav } from "@/components/field-medical/fm-subnav";
@@ -26,9 +27,10 @@ interface PageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export default async function FieldMedicalAnalyticsPage({
+async function FieldMedicalAnalyticsPageContent({
   searchParams,
 }: PageProps) {
+  await connection();
   const params = await searchParams;
   const filters = parseFmFilters(params);
   const [kpis, bottlenecks, matrix, si] = await Promise.all([
@@ -357,4 +359,8 @@ export default async function FieldMedicalAnalyticsPage({
       </Card>
     </div>,
   );
+}
+
+export default function FieldMedicalAnalyticsPage(props: PageProps) {
+  return <Suspense fallback={<p className="p-6 text-sm text-slate-600">Loading workspace…</p>}><FieldMedicalAnalyticsPageContent {...props} /></Suspense>;
 }

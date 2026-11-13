@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+import { Suspense } from "react";
 import { DemoUserSwitcher } from "@/components/settings/demo-user-switcher";
 import {
   Card,
@@ -11,7 +13,8 @@ import { renderAppPage } from "@/lib/page";
 import { getCurrentUser, listDemoUsers } from "@/lib/session";
 import { getRuntimeMode } from "@/lib/supabase/env";
 
-export default async function SettingsPage() {
+async function SettingsPageContent() {
+  await connection();
   const [user, mode, demoUsers] = await Promise.all([
     getCurrentUser(),
     Promise.resolve(getRuntimeMode()),
@@ -91,4 +94,8 @@ export default async function SettingsPage() {
       </Card>
     </div>,
   );
+}
+
+export default function SettingsPage() {
+  return <Suspense fallback={<p className="p-6 text-sm text-slate-600">Loading workspace…</p>}><SettingsPageContent /></Suspense>;
 }

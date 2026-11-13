@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+import { Suspense } from "react";
 import Link from "next/link";
 import { InquiryForm } from "@/components/inquiries/inquiry-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { renderAppPage } from "@/lib/page";
 import { getRuntimeMode } from "@/lib/supabase/env";
 
-export default async function NewInquiryPage() {
+async function NewInquiryPageContent() {
+  await connection();
   const mode = getRuntimeMode();
 
   return renderAppPage(
@@ -43,4 +46,8 @@ export default async function NewInquiryPage() {
       </Card>
     </div>,
   );
+}
+
+export default function NewInquiryPage() {
+  return <Suspense fallback={<p className="p-6 text-sm text-slate-600">Loading workspace…</p>}><NewInquiryPageContent /></Suspense>;
 }

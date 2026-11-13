@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+import { Suspense } from "react";
 import Link from "next/link";
 import { KnowledgeItemCard } from "@/components/knowledge/knowledge-item-card";
 import { KnowledgeSubnav } from "@/components/knowledge/knowledge-subnav";
@@ -8,7 +10,8 @@ import { renderAppPage } from "@/lib/page";
 import { getRuntimeMode } from "@/lib/supabase/env";
 import { listKnowledgeItems } from "@/services/knowledge/items";
 
-export default async function KnowledgeNetworkPage() {
+async function KnowledgeNetworkPageContent() {
+  await connection();
   const mode = getRuntimeMode();
   const approved = listKnowledgeItems({ status: "approved" });
   const pending = listKnowledgeItems({
@@ -127,4 +130,8 @@ export default async function KnowledgeNetworkPage() {
       </ScientificSection>
     </div>,
   );
+}
+
+export default function KnowledgeNetworkPage() {
+  return <Suspense fallback={<p className="p-6 text-sm text-slate-600">Loading workspace…</p>}><KnowledgeNetworkPageContent /></Suspense>;
 }

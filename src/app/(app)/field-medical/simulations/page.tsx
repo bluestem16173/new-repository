@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import Link from "next/link";
 import { Suspense } from "react";
 import { FlaskConical } from "lucide-react";
@@ -34,6 +35,7 @@ export default function SimulationsIndexPage({ searchParams }: PageProps) {
 }
 
 async function SimulationsIndexContent({ searchParams }: PageProps) {
+  await connection();
   const params = await searchParams;
   const filters = parseFmFilters(params);
   const scenarios = await listSimulationScenarios(

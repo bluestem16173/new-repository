@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { WorkflowActions } from "@/components/inquiries/workflow-actions";
@@ -31,7 +33,8 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function InquiryDetailPage({ params }: PageProps) {
+async function InquiryDetailPageContent({ params }: PageProps) {
+  await connection();
   const { id } = await params;
   const [inquiry, user] = await Promise.all([
     getInquiryById(id),
@@ -372,4 +375,8 @@ export default async function InquiryDetailPage({ params }: PageProps) {
       </div>
     </div>,
   );
+}
+
+export default function InquiryDetailPage(props: PageProps) {
+  return <Suspense fallback={<p className="p-6 text-sm text-slate-600">Loading workspace…</p>}><InquiryDetailPageContent {...props} /></Suspense>;
 }

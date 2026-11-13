@@ -90,7 +90,7 @@ describe("enterprise security foundation", () => {
     setDemoCurrentUser("44444444-4444-4444-8444-444444444444");
     expect(getRuntimeMode()).toBe("demo");
     const result = await approveKnowledgeItemAction(
-      "kn-item-0002-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      "29a87293-1186-5b03-b144-f10792563be8",
     );
     expect(result.ok).toBe(false);
     if (!result.ok) {

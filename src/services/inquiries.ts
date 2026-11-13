@@ -28,7 +28,7 @@ import {
 } from "@/lib/demo/seed";
 import { getRuntimeMode } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getCurrentUser } from "@/lib/session";
+import { getCurrentUserOrganization, getCurrentUser } from "@/lib/session";
 
 function nextReferenceCode(existing: MedicalInquiry[]): string {
   const year = new Date().getUTCFullYear();
@@ -171,7 +171,7 @@ export async function getInquiryById(
 
   const inquiry = mapInquiryRow(row as Record<string, unknown>);
 
-  const [{ data: citations }, { data: reviews }, { data: auditEvents }] =
+  const [citationResult, reviewResult, auditResult] =
     await Promise.all([
       supabase
         .from("evidence_citations")
@@ -189,6 +189,12 @@ export async function getInquiryById(
         .eq("entity_id", id)
         .order("created_at", { ascending: false }),
     ]);
+  for (const result of [citationResult, reviewResult, auditResult]) {
+    if (result.error) throw new Error("Could not load inquiry evidence, review, or audit records.");
+  }
+  const { data: citations } = citationResult;
+  const { data: reviews } = reviewResult;
+  const { data: auditEvents } = auditResult;
 
   return {
     ...inquiry,
@@ -305,17 +311,16 @@ export async function createInquiry(
     throw new Error("Supabase client unavailable");
   }
 
-  const { count } = await supabase
-    .from("medical_inquiries")
-    .select("*", { count: "exact", head: true });
-
-  const year = new Date().getUTCFullYear();
-  const referenceCode = `MI-${year}-${String((count ?? 0) + 1).padStart(4, "0")}`;
+  const organization = await getCurrentUserOrganization();
+  if (organization.error || !organization.organizationId) throw new Error("Organization membership required.");
+  // UUID suffix avoids races and cross-tenant collisions from RLS-filtered counts.
+  const referenceCode = `MI-${new Date().getUTCFullYear()}-${randomUUID()}`;
 
   const { data, error } = await supabase
     .from("medical_inquiries")
     .insert({
       reference_code: referenceCode,
+      organization_id: organization.organizationId,
       title: input.title,
       question_text: input.questionText,
       product_name: input.productName,
@@ -367,6 +372,7 @@ export async function transitionInquiry(
 
   if (input.toStatus === "approved") {
     assertCanApprove(user.role);
+    if (existing.createdById === user.id) throw new Error("Authors cannot approve their own responses.");
   }
 
   if (
@@ -464,6 +470,7 @@ export async function transitionInquiry(
       updated_at: now,
     })
     .eq("id", existing.id)
+    .eq("status", existing.status)
     .select("*")
     .single();
 

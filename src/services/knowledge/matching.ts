@@ -64,6 +64,7 @@ export function matchApprovedKnowledge(filters: KnowledgeSearchFilters): {
   const limit = filters.limit ?? 8;
 
   const candidates = store.items.filter((item) => {
+    if (item.status !== "approved" || item.currencyStatus !== "current") return false;
     if (filters.status && filters.status !== "all") {
       if (item.status !== filters.status) return false;
     } else if (!filters.status || filters.status === "all") {
@@ -138,9 +139,7 @@ export function matchApprovedKnowledge(filters: KnowledgeSearchFilters): {
     const outdated = row.item.currencyStatus === "outdated";
     const applicability = outdated
       ? "similar_not_applicable"
-      : row.score >= 2
-        ? "approved_for_reuse"
-        : "requires_adaptation";
+      : "requires_adaptation";
 
     const warnings = [
       "Similarity is not the same as approved applicability.",

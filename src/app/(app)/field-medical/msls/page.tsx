@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import Link from "next/link";
 import { Suspense } from "react";
 import { FieldMedicalSubnav } from "@/components/field-medical/fm-subnav";
@@ -20,7 +21,8 @@ interface PageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export default async function MslRosterPage({ searchParams }: PageProps) {
+async function MslRosterPageContent({ searchParams }: PageProps) {
+  await connection();
   const params = await searchParams;
   const filters = parseFmFilters(params);
   const query = typeof params.q === "string" ? params.q : "";
@@ -191,4 +193,8 @@ export default async function MslRosterPage({ searchParams }: PageProps) {
       </Card>
     </div>,
   );
+}
+
+export default function MslRosterPage(props: PageProps) {
+  return <Suspense fallback={<p className="p-6 text-sm text-slate-600">Loading workspace…</p>}><MslRosterPageContent {...props} /></Suspense>;
 }

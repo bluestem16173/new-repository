@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import Link from "next/link";
 import { Suspense } from "react";
 import {
@@ -37,9 +38,10 @@ interface PageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export default async function FieldMedicalDashboardPage({
+async function FieldMedicalDashboardPageContent({
   searchParams,
 }: PageProps) {
+  await connection();
   const params = await searchParams;
   const filters = parseFmFilters(params);
   const [kpis, scenarios] = await Promise.all([
@@ -262,4 +264,8 @@ export default async function FieldMedicalDashboardPage({
       </Card>
     </div>,
   );
+}
+
+export default function FieldMedicalDashboardPage(props: PageProps) {
+  return <Suspense fallback={<p className="p-6 text-sm text-slate-600">Loading workspace…</p>}><FieldMedicalDashboardPageContent {...props} /></Suspense>;
 }

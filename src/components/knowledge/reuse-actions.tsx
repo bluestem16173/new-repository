@@ -52,6 +52,7 @@ export function KnowledgeReuseActions({
         Context verification required. Recording a decision does not transmit
         content externally.
       </p>
+      {!inquiryId ? <p className="text-sm text-amber-800">Open a linked inquiry to record accepted or adapted reuse. Verification notes are required.</p> : null}
       <label className="block space-y-1 text-[13px] text-[#17212B]/70">
         Verification notes
         <textarea
@@ -72,7 +73,7 @@ export function KnowledgeReuseActions({
                 ? "bg-[#2563EB] text-white hover:bg-[#1D4ED8]"
                 : "border-[#E5E7EB]"
             }
-            disabled={pending}
+            disabled={pending || ((decision.value === "accepted" || decision.value === "adapted") && (!inquiryId || !notes.trim()))}
             onClick={() => record(decision.value)}
           >
             {decision.label}

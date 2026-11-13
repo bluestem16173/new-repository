@@ -1,3 +1,4 @@
+import { assertSyntheticRuntime } from "@/lib/demo/guard";
 import type {
   Assessment,
   CoachingActivity,
@@ -508,6 +509,7 @@ export function createFieldMedicalSeed(seed = FM_DEMO_SEED): FieldMedicalStore {
 }
 
 export function getFieldMedicalStore(): FieldMedicalStore {
+  assertSyntheticRuntime();
   if (!globalThis.__medintelFieldMedicalStore) {
     globalThis.__medintelFieldMedicalStore = createFieldMedicalSeed();
   }

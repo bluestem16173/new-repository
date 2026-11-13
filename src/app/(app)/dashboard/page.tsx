@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+import { Suspense } from "react";
 import Link from "next/link";
 import {
   ClipboardList,
@@ -23,7 +25,8 @@ import { getDashboardOverview } from "@/services/inquiries";
 import { DEMO_MODE_NOTICE } from "@/lib/demo/seed";
 import { getRuntimeMode } from "@/lib/supabase/env";
 
-export default async function DashboardPage() {
+async function DashboardPageContent() {
+  await connection();
   const [overview, mode] = await Promise.all([
     getDashboardOverview(),
     Promise.resolve(getRuntimeMode()),
@@ -194,4 +197,8 @@ export default async function DashboardPage() {
       </ScientificSection>
     </div>,
   );
+}
+
+export default function DashboardPage() {
+  return <Suspense fallback={<p className="p-6 text-sm text-slate-600">Loading workspace…</p>}><DashboardPageContent /></Suspense>;
 }

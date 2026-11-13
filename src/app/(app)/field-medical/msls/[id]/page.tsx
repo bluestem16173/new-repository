@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FieldMedicalSubnav } from "@/components/field-medical/fm-subnav";
@@ -20,7 +22,8 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function MslDetailPage({ params }: PageProps) {
+async function MslDetailPageContent({ params }: PageProps) {
+  await connection();
   const { id } = await params;
   const detail = await getMslDetail(id);
   if (!detail) notFound();
@@ -225,4 +228,8 @@ export default async function MslDetailPage({ params }: PageProps) {
       </Card>
     </div>,
   );
+}
+
+export default function MslDetailPage(props: PageProps) {
+  return <Suspense fallback={<p className="p-6 text-sm text-slate-600">Loading workspace…</p>}><MslDetailPageContent {...props} /></Suspense>;
 }

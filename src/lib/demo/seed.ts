@@ -1,3 +1,4 @@
+import { assertSyntheticRuntime } from "@/lib/demo/guard";
 import type {
   AuditEvent,
   EvidenceCitation,
@@ -283,6 +284,7 @@ function createInitialStore(): DemoStore {
 }
 
 export function getDemoStore(): DemoStore {
+  assertSyntheticRuntime();
   if (!globalThis.__medintelDemoStore) {
     globalThis.__medintelDemoStore = createInitialStore();
   }

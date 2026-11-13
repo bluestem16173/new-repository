@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FieldMedicalSubnav } from "@/components/field-medical/fm-subnav";
@@ -22,7 +24,8 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function CoachingDetailPage({ params }: PageProps) {
+async function CoachingDetailPageContent({ params }: PageProps) {
+  await connection();
   const { id } = await params;
   const { store } = await loadFieldMedicalStore();
   const plan = store.coachingPlans.find((p) => p.id === id);
@@ -150,4 +153,8 @@ export default async function CoachingDetailPage({ params }: PageProps) {
       </div>
     </div>,
   );
+}
+
+export default function CoachingDetailPage(props: PageProps) {
+  return <Suspense fallback={<p className="p-6 text-sm text-slate-600">Loading workspace…</p>}><CoachingDetailPageContent {...props} /></Suspense>;
 }
