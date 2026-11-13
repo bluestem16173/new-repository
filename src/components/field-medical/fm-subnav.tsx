@@ -9,6 +9,7 @@ const LINKS: Array<{ href: string; label: string; exact?: boolean }> = [
   { href: "/field-medical/msls", label: "MSL roster" },
   { href: "/field-medical/competencies", label: "Competencies" },
   { href: "/field-medical/coaching", label: "Coaching" },
+  { href: "/field-medical/simulations", label: "Simulations" },
   { href: "/field-medical/analytics", label: "Analytics" },
 ];
 

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { FieldMedicalSubnav } from "@/components/field-medical/fm-subnav";
 import { FieldMedicalFilters } from "@/components/field-medical/fm-filters";
+import { ScientificSection } from "@/components/scientific/scientific-section";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -11,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { FM_DEMO_NOTICE } from "@/lib/demo/field-medical-seed";
+import { SI_EVIDENCE_NOTICE } from "@/lib/demo/scientific-evidence-seed";
 import { renderAppPage } from "@/lib/page";
 import {
   getBottleneckAnalytics,
@@ -18,6 +20,7 @@ import {
   getFieldMedicalDashboard,
   parseFmFilters,
 } from "@/services/field-medical/analytics";
+import { getScientificIntelligenceAnalytics } from "@/services/scientific/analytics";
 
 interface PageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -28,10 +31,15 @@ export default async function FieldMedicalAnalyticsPage({
 }: PageProps) {
   const params = await searchParams;
   const filters = parseFmFilters(params);
-  const [kpis, bottlenecks, matrix] = await Promise.all([
+  const [kpis, bottlenecks, matrix, si] = await Promise.all([
     getFieldMedicalDashboard(filters),
     getBottleneckAnalytics(filters),
     getCompetencyMatrix(filters.therapeuticArea),
+    Promise.resolve(
+      getScientificIntelligenceAnalytics({
+        therapeuticArea: filters.therapeuticArea,
+      }),
+    ),
   ]);
 
   const maxBacklog = Math.max(
@@ -56,10 +64,130 @@ export default async function FieldMedicalAnalyticsPage({
         <FieldMedicalSubnav />
       </header>
 
-      <p className="text-sm text-amber-900">{FM_DEMO_NOTICE}</p>
+      <div className="space-y-2 text-sm text-amber-900">
+        <p>{FM_DEMO_NOTICE}</p>
+        <p className="text-[#17212B]/70">{SI_EVIDENCE_NOTICE}</p>
+      </div>
       <Suspense fallback={null}>
         <FieldMedicalFilters />
       </Suspense>
+
+      <ScientificSection
+        title="Scientific Intelligence operations"
+        description={`${si.window} Data kind: ${si.dataKind}. ${si.missingData}`}
+      >
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card className="border border-[#E5E7EB] shadow-none ring-0">
+            <CardHeader className="pb-2">
+              <CardDescription>Simulation completion</CardDescription>
+              <CardTitle className="text-3xl tabular-nums text-[#17212B]">
+                {si.fieldMedical.simulationCompletion.value === null
+                  ? "N/A"
+                  : `${si.fieldMedical.simulationCompletion.value}%`}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-[13px] leading-relaxed text-[#17212B]/65">
+              {si.fieldMedical.simulationCompletion.numerator}/
+              {si.fieldMedical.simulationCompletion.denominator}.{" "}
+              {si.fieldMedical.simulationCompletion.definition}
+            </CardContent>
+          </Card>
+          <Card className="border border-[#E5E7EB] shadow-none ring-0">
+            <CardHeader className="pb-2">
+              <CardDescription>Validation rate</CardDescription>
+              <CardTitle className="text-3xl tabular-nums text-[#17212B]">
+                {si.fieldMedical.validationRate.value === null
+                  ? "N/A"
+                  : `${si.fieldMedical.validationRate.value}%`}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-[13px] leading-relaxed text-[#17212B]/65">
+              {si.fieldMedical.validationRate.numerator}/
+              {si.fieldMedical.validationRate.denominator}.{" "}
+              {si.fieldMedical.validationRate.definition}
+            </CardContent>
+          </Card>
+          <Card className="border border-[#E5E7EB] shadow-none ring-0">
+            <CardHeader className="pb-2">
+              <CardDescription>Accuracy flags</CardDescription>
+              <CardTitle className="text-3xl tabular-nums text-[#17212B]">
+                {si.fieldMedical.scientificAccuracyFlags.value}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-[13px] leading-relaxed text-[#17212B]/65">
+              / {si.fieldMedical.scientificAccuracyFlags.denominator} evaluations.{" "}
+              {si.fieldMedical.scientificAccuracyFlags.definition}
+            </CardContent>
+          </Card>
+          <Card className="border border-[#E5E7EB] shadow-none ring-0">
+            <CardHeader className="pb-2">
+              <CardDescription>Unsupported claim rate</CardDescription>
+              <CardTitle className="text-3xl tabular-nums text-[#17212B]">
+                {si.medicalInformation.unsupportedClaimRate.value === null
+                  ? "N/A"
+                  : `${si.medicalInformation.unsupportedClaimRate.value}%`}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-[13px] leading-relaxed text-[#17212B]/65">
+              {si.medicalInformation.unsupportedClaimRate.definition}
+            </CardContent>
+          </Card>
+        </div>
+        <div className="mt-6 overflow-x-auto">
+          <table className="w-full min-w-[640px] text-left text-sm">
+            <caption className="mb-3 text-left text-[14px] text-[#17212B]/70">
+              Competency gaps by simulation category (provisional scores; null
+              averages when no evaluations).
+            </caption>
+            <thead>
+              <tr className="border-b border-[#E5E7EB] text-[#17212B]/55">
+                <th className="py-2 pr-3 font-medium">Category</th>
+                <th className="py-2 pr-3 font-medium">Sessions</th>
+                <th className="py-2 pr-3 font-medium">Evals</th>
+                <th className="py-2 pr-3 font-medium">Flags</th>
+                <th className="py-2 font-medium">Avg accuracy</th>
+              </tr>
+            </thead>
+            <tbody>
+              {si.fieldMedical.gapsByCategory.map((row) => (
+                <tr key={row.category} className="border-b border-[#E5E7EB]">
+                  <td className="py-2.5 pr-3 font-medium text-[#17212B]">
+                    {row.label}
+                  </td>
+                  <td className="py-2.5 pr-3 tabular-nums">{row.sessionCount}</td>
+                  <td className="py-2.5 pr-3 tabular-nums">
+                    {row.evaluationCount}
+                  </td>
+                  <td className="py-2.5 pr-3 tabular-nums">
+                    {row.criticalFlagCount}
+                  </td>
+                  <td className="py-2.5 tabular-nums">
+                    {row.avgScientificAccuracy === null
+                      ? "N/A"
+                      : row.avgScientificAccuracy}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-4 text-[14px] leading-relaxed text-[#17212B]/70">
+          MI queue: {si.medicalInformation.reviewQueueAging.pendingCount} pending
+          claims; median age{" "}
+          {si.medicalInformation.reviewQueueAging.medianAgeHours === null
+            ? "N/A"
+            : `${si.medicalInformation.reviewQueueAging.medianAgeHours}h`}
+          . First-pass medical approval (supported / decided claims):{" "}
+          {si.medicalInformation.firstPassMedicalApprovalRate.value === null
+            ? "N/A"
+            : `${si.medicalInformation.firstPassMedicalApprovalRate.value}%`}
+          . Draft turnaround:{" "}
+          {si.medicalInformation.draftTurnaround.value === null
+            ? "N/A (persisted join not wired in demo)"
+            : `${si.medicalInformation.draftTurnaround.value}h`}
+          . {si.fieldMedical.coachingNote}
+        </p>
+      </ScientificSection>
 
       <section className="grid gap-4 lg:grid-cols-2">
         <Card className="rounded-[12px] border-0 bg-white shadow-none ring-1 ring-[#10243A]/8">

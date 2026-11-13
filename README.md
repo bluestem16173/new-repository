@@ -14,7 +14,10 @@ Independent demonstration portfolio for pharmaceutical **Medical Affairs** and *
 | PostgreSQL schema + RLS migrations | Validated (apply to your project) |
 | Demo mode with seeded synthetic data | Validated |
 | Field Medical Excellence module | Validated (synthetic demo corpus) |
-| OpenAI medical response generation | Not implemented (no auto-release) |
+| Scientific Intelligence shared evidence foundation | Validated (demo/synthetic corpus; keyword retrieval) |
+| MSL scientific exchange simulations | Validated (deterministic HCP teaching turns; provisional rubric) |
+| MI claim-level scientific draft review | Validated (extends inquiry detail; no auto-release) |
+| OpenAI live literature / generative HCP | Not implemented (demo uses deterministic allowlisted responses) |
 
 ### Workflow states
 
@@ -61,6 +64,7 @@ Apply migrations in order:
 2. `supabase/migrations/002_rls_policies.sql`
 3. `supabase/migrations/003_field_medical_schema.sql`
 4. `supabase/migrations/004_field_medical_rls.sql`
+5. `supabase/migrations/005_scientific_intelligence.sql`
 
 Then create Auth users and matching `profiles` rows with roles:
 `admin`, `medical_reviewer`, `medical_information_specialist`, `msl`, `field_director`.
@@ -102,16 +106,18 @@ npm run build
 - Service-role key is never imported into client modules.
 - Server-side authorization for transitions; RLS + DB trigger reinforce approve-only roles.
 - Audit events recorded for consequential workflow transitions.
-- AI-generated medical responses are not auto-released (feature not implemented).
+- AI-generated medical responses are never auto-released; SI drafts and simulation scores require human review.
+- Simulation formal competency is never auto-approved into readiness.
 
 ## Known limitations
 
 - Demo mode state lives in the Node process and resets on restart.
 - Supabase Auth UI / invite flows are not built; connect your own auth when configuring Supabase.
-- Evidence catalog does not retrieve live literature APIs.
-- Field Medical KPIs are derived from synthetic seed records; Supabase FM tables exist for migration but the runtime demo adapter is in-memory until populated.
+- Evidence catalog does not retrieve live literature APIs; SI demo corpus is illustrative/synthetic teaching content only.
+- Field Medical and SI runtimes use in-memory demo adapters (SQL migrations ready; not yet wired for live DB writes).
 - Citations in seed data are fictional illustrations — not real publications.
 - Coaching → later score comparisons are observational only and do not claim causation.
+- OpenAI-backed generative HCP / drafting is not wired; demo uses deterministic allowlisted heuristics.
 
 ## Routes
 
@@ -125,6 +131,8 @@ npm run build
 - `/field-medical/competencies`
 - `/field-medical/coaching`
 - `/field-medical/coaching/[id]`
+- `/field-medical/simulations`
+- `/field-medical/simulations/[id]`
 - `/field-medical/analytics`
 - `/evidence`
 - `/settings`

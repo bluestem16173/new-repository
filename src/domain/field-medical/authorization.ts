@@ -8,6 +8,11 @@ export function canApproveReadiness(role: UserRole): boolean {
   return role === "admin" || role === "field_director" || role === "medical_reviewer";
 }
 
+/** Reviewer validation of provisional simulation evaluations (not auto-readiness). */
+export function canValidateFmCompetency(role: UserRole): boolean {
+  return role === "admin" || role === "field_director" || role === "medical_reviewer";
+}
+
 export function canMutateCoaching(role: UserRole): boolean {
   return role === "admin" || role === "field_director";
 }

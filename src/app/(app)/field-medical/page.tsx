@@ -3,12 +3,18 @@ import { Suspense } from "react";
 import {
   AlertTriangle,
   ClipboardCheck,
+  FlaskConical,
   Timer,
   UserRoundCheck,
 } from "lucide-react";
 import { MetricCard } from "@/components/shared/metric-card";
 import { FieldMedicalSubnav } from "@/components/field-medical/fm-subnav";
 import { FieldMedicalFilters } from "@/components/field-medical/fm-filters";
+import { ScientificSection } from "@/components/scientific/scientific-section";
+import {
+  THERAPEUTIC_AREA_ROWS,
+  TherapeuticAreaRow,
+} from "@/components/scientific/therapeutic-area-row";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,12 +23,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { renderAppPage } from "@/lib/page";
+import { THERAPEUTIC_AREA_LABELS } from "@/domain/field-medical/types";
 import { FM_DEMO_NOTICE } from "@/lib/demo/field-medical-seed";
+import { SI_EVIDENCE_NOTICE } from "@/lib/demo/scientific-evidence-seed";
+import { renderAppPage } from "@/lib/page";
 import {
   getFieldMedicalDashboard,
   parseFmFilters,
 } from "@/services/field-medical/analytics";
+import { listSimulationScenarios } from "@/services/scientific/simulations";
 
 interface PageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -33,192 +42,224 @@ export default async function FieldMedicalDashboardPage({
 }: PageProps) {
   const params = await searchParams;
   const filters = parseFmFilters(params);
-  const kpis = await getFieldMedicalDashboard(filters);
+  const [kpis, scenarios] = await Promise.all([
+    getFieldMedicalDashboard(filters),
+    listSimulationScenarios(
+      filters.therapeuticArea === "all" ? undefined : filters.therapeuticArea,
+    ),
+  ]);
   const taQuery =
     filters.therapeuticArea === "all" ? "" : `?ta=${filters.therapeuticArea}`;
+  const selectedLabel =
+    filters.therapeuticArea === "all"
+      ? null
+      : THERAPEUTIC_AREA_LABELS[filters.therapeuticArea];
 
   return renderAppPage(
     "Field Medical",
-    <div className="mx-auto w-full max-w-[1440px] space-y-8">
-      <header className="space-y-3">
+    <div className="mx-auto w-full max-w-[1100px] space-y-12 bg-white px-1 py-2">
+      <header className="space-y-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="space-y-2">
-            <h2 className="text-2xl font-semibold tracking-tight text-[#10243A]">
+          <div className="space-y-3">
+            <h2 className="text-[1.75rem] font-semibold tracking-tight text-[#17212B]">
               Field Medical Excellence
             </h2>
-            <p className="max-w-3xl text-base leading-relaxed text-[#10243A]/65">
+            <p className="max-w-3xl text-[16px] leading-[1.65] text-[#17212B]/70">
               Workforce readiness, scientific competency, and continuous
-              capability development.
+              capability development across therapeutic areas.
             </p>
           </div>
-          <Button
-            variant="outline"
-            className="border-[#10243A]/15"
-            render={<Link href={`/field-medical/msls${taQuery}`} />}
-          >
-            Open MSL roster
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              className="border-[#E5E7EB] text-[#17212B]"
+              render={<Link href={`/field-medical/simulations${taQuery}`} />}
+            >
+              Simulations
+            </Button>
+            <Button
+              className="bg-[#2563EB] text-white hover:bg-[#1D4ED8]"
+              render={<Link href={`/field-medical/msls${taQuery}`} />}
+            >
+              Open MSL roster
+            </Button>
+          </div>
         </div>
         <FieldMedicalSubnav />
       </header>
 
       <div
-        className="rounded-[12px] border border-amber-200/80 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-950"
+        className="space-y-2 border border-[#E5E7EB] bg-[#FAFBFC] px-4 py-3 text-[14px] leading-relaxed text-[#17212B]/80"
         role="status"
       >
-        {FM_DEMO_NOTICE} All KPIs below are derived from the deterministic
-        synthetic seed (N shown per metric).
+        <p>{FM_DEMO_NOTICE}</p>
+        <p>{SI_EVIDENCE_NOTICE}</p>
       </div>
 
-      <Suspense fallback={<p className="text-sm text-muted-foreground">Loading filters…</p>}>
+      <ScientificSection
+        title="Therapeutic areas"
+        description="Select a therapeutic area to filter MSL profiles, competency requirements, simulations, and operational metrics. Entire rows are keyboard-focusable."
+      >
+        <div className="border-t border-[#E5E7EB]">
+          {THERAPEUTIC_AREA_ROWS.map((area) => (
+            <TherapeuticAreaRow key={area.id} area={area} />
+          ))}
+        </div>
+      </ScientificSection>
+
+      {selectedLabel ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 border border-[#E5E7EB] bg-[#FAFBFC] px-4 py-3 text-sm">
+          <p className="text-[#17212B]">
+            Filtered to <span className="font-semibold">{selectedLabel}</span>
+          </p>
+          <Link
+            href="/field-medical"
+            className="font-medium text-[#2563EB] hover:underline"
+          >
+            Clear filter
+          </Link>
+        </div>
+      ) : null}
+
+      <Suspense
+        fallback={
+          <p className="text-sm text-[#17212B]/60">Loading filters…</p>
+        }
+      >
         <FieldMedicalFilters />
       </Suspense>
 
-      <section
-        aria-label="Field Medical KPIs"
-        className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+      <ScientificSection
+        title="Operational KPIs"
+        description="Derived from synthetic source records for the selected population. Denominators shown on each card."
       >
-        <Link
-          href={`/field-medical/msls${taQuery ? `${taQuery}&` : "?"}readiness=approved`}
-          className="rounded-[12px] outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/40"
+        <section
+          aria-label="Field Medical KPIs"
+          className="grid gap-4 sm:grid-cols-2"
         >
-          <MetricCard
-            title="Median Time to Readiness"
-            value={
-              kpis.medianTimeToReadiness.value === null
-                ? "N/A"
-                : `${kpis.medianTimeToReadiness.value}d`
-            }
-            description={`Approved cohort n=${kpis.medianTimeToReadiness.approvedCohortCount}. Open onboarding n=${kpis.medianTimeToReadiness.openOnboardingCount}${kpis.medianTimeToReadiness.openOnboardingMedianAgeDays !== null ? ` (median age ${kpis.medianTimeToReadiness.openOnboardingMedianAgeDays}d)` : ""}.`}
-            icon={<Timer className="size-4" />}
-          />
-        </Link>
-        <Link
-          href={`/field-medical/competencies${taQuery}`}
-          className="rounded-[12px] outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/40"
-        >
-          <MetricCard
-            title="Competency Attainment Rate"
-            value={
-              kpis.competencyAttainment.value === null
-                ? "N/A"
-                : `${kpis.competencyAttainment.value}%`
-            }
-            description={`${kpis.competencyAttainment.numerator}/${kpis.competencyAttainment.denominator} required pairs with current validated passes.`}
-            icon={<ClipboardCheck className="size-4" />}
-          />
-        </Link>
-        <Link
-          href={`/field-medical/coaching${taQuery}`}
-          className="rounded-[12px] outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/40"
-        >
-          <MetricCard
-            title="On-Time Coaching Completion"
-            value={
-              kpis.onTimeCoaching.value === null
-                ? "N/A"
-                : `${kpis.onTimeCoaching.value}%`
-            }
-            description={`On-time ${kpis.onTimeCoaching.onTimeCount}/${kpis.onTimeCoaching.dueCount}. Eventual ${kpis.onTimeCoaching.eventualCompletionCount}. Overdue ${kpis.onTimeCoaching.overdueCount}.`}
-            icon={<UserRoundCheck className="size-4" />}
-          />
-        </Link>
-        <Link
-          href={`/field-medical/msls${taQuery ? `${taQuery}&` : "?"}attention=1`}
-          className="rounded-[12px] outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/40"
-        >
-          <MetricCard
-            title="MSLs Requiring Attention"
-            value={kpis.mslsRequiringAttention.value}
-            description={`Distinct MSLs with actionable issues out of ${kpis.mslsRequiringAttention.population} in filter.`}
-            icon={<AlertTriangle className="size-4" />}
-          />
-        </Link>
-      </section>
+          <Link
+            href={`/field-medical/msls${taQuery ? `${taQuery}&` : "?"}readiness=approved`}
+            className="outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/40"
+          >
+            <MetricCard
+              title="Median Time to Readiness"
+              value={
+                kpis.medianTimeToReadiness.value === null
+                  ? "N/A"
+                  : `${kpis.medianTimeToReadiness.value}d`
+              }
+              description={`Approved cohort n=${kpis.medianTimeToReadiness.approvedCohortCount}. Open onboarding n=${kpis.medianTimeToReadiness.openOnboardingCount}.`}
+              icon={<Timer className="size-4" />}
+              className="border border-[#E5E7EB] shadow-none ring-0"
+            />
+          </Link>
+          <Link
+            href={`/field-medical/competencies${taQuery}`}
+            className="outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/40"
+          >
+            <MetricCard
+              title="Competency Attainment Rate"
+              value={
+                kpis.competencyAttainment.value === null
+                  ? "N/A"
+                  : `${kpis.competencyAttainment.value}%`
+              }
+              description={`${kpis.competencyAttainment.numerator}/${kpis.competencyAttainment.denominator} required pairs.`}
+              icon={<ClipboardCheck className="size-4" />}
+              className="border border-[#E5E7EB] shadow-none ring-0"
+            />
+          </Link>
+          <Link
+            href={`/field-medical/coaching${taQuery}`}
+            className="outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/40"
+          >
+            <MetricCard
+              title="On-Time Coaching Completion"
+              value={
+                kpis.onTimeCoaching.value === null
+                  ? "N/A"
+                  : `${kpis.onTimeCoaching.value}%`
+              }
+              description={`On-time ${kpis.onTimeCoaching.onTimeCount}/${kpis.onTimeCoaching.dueCount}. Overdue ${kpis.onTimeCoaching.overdueCount}.`}
+              icon={<UserRoundCheck className="size-4" />}
+              className="border border-[#E5E7EB] shadow-none ring-0"
+            />
+          </Link>
+          <Link
+            href={`/field-medical/msls${taQuery ? `${taQuery}&` : "?"}attention=1`}
+            className="outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/40"
+          >
+            <MetricCard
+              title="MSLs Requiring Attention"
+              value={kpis.mslsRequiringAttention.value}
+              description={`Distinct MSLs with issues / ${kpis.mslsRequiringAttention.population} in filter.`}
+              icon={<AlertTriangle className="size-4" />}
+              className="border border-[#E5E7EB] shadow-none ring-0"
+            />
+          </Link>
+        </section>
+      </ScientificSection>
 
-      <section className="grid gap-4 lg:grid-cols-2">
-        <Card className="rounded-[12px] border-0 bg-white shadow-none ring-1 ring-[#10243A]/8">
-          <CardHeader>
-            <CardTitle className="text-base text-[#10243A]">
-              Metric definitions
-            </CardTitle>
-            <CardDescription>
-              Documented numerator/denominator logic — no fabricated trends.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 text-sm leading-relaxed text-[#10243A]/75">
-            <div>
-              <p className="font-medium text-[#10243A]">
-                {kpis.medianTimeToReadiness.definition.name}
-              </p>
-              <p>{kpis.medianTimeToReadiness.definition.definition}</p>
-            </div>
-            <div>
-              <p className="font-medium text-[#10243A]">
-                {kpis.competencyAttainment.definition.name}
-              </p>
-              <p>{kpis.competencyAttainment.definition.definition}</p>
-            </div>
-            <div>
-              <p className="font-medium text-[#10243A]">
-                {kpis.onTimeCoaching.definition.name}
-              </p>
-              <p>{kpis.onTimeCoaching.definition.definition}</p>
-            </div>
-          </CardContent>
-        </Card>
+      <ScientificSection
+        title="Scientific exchange simulations"
+        description="Interactive teaching scenarios grounded in allowlisted synthetic passages. AI HCP turns must not invent study facts; provisional scores require reviewer validation."
+        action={
+          <Button
+            variant="outline"
+            className="border-[#E5E7EB]"
+            render={<Link href={`/field-medical/simulations${taQuery}`} />}
+          >
+            View all
+          </Button>
+        }
+      >
+        <div className="divide-y divide-[#E5E7EB] border-y border-[#E5E7EB]">
+          {scenarios.length === 0 ? (
+            <p className="py-8 text-[15px] text-[#17212B]/65">
+              No simulations for this therapeutic area filter.
+            </p>
+          ) : (
+            scenarios.slice(0, 4).map((scenario) => (
+              <Link
+                key={scenario.id}
+                href={`/field-medical/simulations/${scenario.id}`}
+                className="flex items-start gap-4 py-5 outline-none transition-colors hover:bg-[#FAFBFC] focus-visible:ring-2 focus-visible:ring-[#2563EB]/35"
+              >
+                <div className="mt-0.5 flex size-10 items-center justify-center rounded-md border border-[#E5E7EB] bg-[#F8FAFC] text-[#2563EB]">
+                  <FlaskConical className="size-4" aria-hidden />
+                </div>
+                <div className="min-w-0 space-y-1">
+                  <p className="font-semibold text-[#17212B]">{scenario.title}</p>
+                  <p className="text-[14px] leading-relaxed text-[#17212B]/65">
+                    {scenario.hcpPersona}
+                  </p>
+                  <p className="text-xs uppercase tracking-wide text-[#17212B]/45">
+                    {scenario.category.replaceAll("_", " ")} · rubric{" "}
+                    {scenario.rubricVersion}
+                  </p>
+                </div>
+              </Link>
+            ))
+          )}
+        </div>
+      </ScientificSection>
 
-        <Card className="rounded-[12px] border-0 bg-white shadow-none ring-1 ring-[#10243A]/8">
-          <CardHeader>
-            <CardTitle className="text-base text-[#10243A]">
-              Attention issue categories
-            </CardTitle>
-            <CardDescription>
-              Deduplicated at MSL level for the KPI; categories listed below.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {kpis.mslsRequiringAttention.issues.length === 0 ? (
-              <p className="text-sm text-[#10243A]/60">No attention issues in filter.</p>
-            ) : (
-              <ul className="space-y-2 text-sm">
-                {(
-                  [
-                    "overdue_coaching",
-                    "missing_required_competency",
-                    "failed_validated_assessment",
-                    "extended_onboarding",
-                  ] as const
-                ).map((category) => {
-                  const count = kpis.mslsRequiringAttention.issues.filter(
-                    (i) => i.category === category,
-                  ).length;
-                  return (
-                    <li
-                      key={category}
-                      className="flex items-center justify-between rounded-lg bg-[#F3F6FA] px-3 py-2"
-                    >
-                      <span className="capitalize text-[#10243A]">
-                        {category.replaceAll("_", " ")}
-                      </span>
-                      <span className="tabular-nums font-medium text-[#10243A]">
-                        {count}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-            <Button
-              className="mt-4"
-              variant="outline"
-              render={<Link href={`/field-medical/analytics${taQuery}`} />}
-            >
-              View bottleneck analytics
-            </Button>
-          </CardContent>
-        </Card>
-      </section>
+      <Card className="border border-[#E5E7EB] shadow-none ring-0">
+        <CardHeader>
+          <CardTitle className="text-base text-[#17212B]">
+            Metric definitions
+          </CardTitle>
+          <CardDescription className="text-[14px] leading-relaxed">
+            Documented numerator/denominator logic — no fabricated trends or
+            causal productivity claims.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4 text-[15px] leading-[1.65] text-[#17212B]/75">
+          <p>{kpis.medianTimeToReadiness.definition.definition}</p>
+          <p>{kpis.competencyAttainment.definition.definition}</p>
+          <p>{kpis.onTimeCoaching.definition.definition}</p>
+        </CardContent>
+      </Card>
     </div>,
   );
 }
