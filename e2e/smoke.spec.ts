@@ -33,9 +33,25 @@ test.describe("MedIntel smoke", () => {
       page.getByRole("heading", { name: "Field Medical Excellence" }),
     ).toBeVisible();
     await expect(page.getByText(/synthetic demonstration/i).first()).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Therapeutic areas" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /General Medicine/i }),
+    ).toBeVisible();
     await page.getByRole("link", { name: "Open MSL roster" }).click();
     await expect(
       page.getByRole("heading", { name: "MSL roster", exact: true }),
     ).toBeVisible();
   });
+
+  test("field medical simulations catalog is reachable", async ({ page }) => {
+    await page.goto("/field-medical/simulations");
+    await expect(
+      page.getByRole("heading", {
+        name: "MSL scientific exchange simulations",
+      }),
+    ).toBeVisible();
+  });
 });
+

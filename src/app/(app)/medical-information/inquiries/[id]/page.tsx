@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { WorkflowActions } from "@/components/inquiries/workflow-actions";
+import { ClaimReviewPanel } from "@/components/scientific/claim-review-panel";
+import { ScientificSection } from "@/components/scientific/scientific-section";
 import { StatusIndicator } from "@/components/shared/status-indicator";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Badge } from "@/components/ui/badge";
@@ -13,11 +15,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { canApproveInquiry, canCreateInquiry } from "@/domain/authorization";
 import { WORKFLOW_STATUS_LABELS } from "@/domain/workflow";
+import { SI_EVIDENCE_NOTICE } from "@/lib/demo/scientific-evidence-seed";
 import { renderAppPage } from "@/lib/page";
 import { getCurrentUser } from "@/lib/session";
 import { getInquiryById } from "@/services/inquiries";
 import { getRuntimeMode } from "@/lib/supabase/env";
+import { getDraftsForInquiry } from "@/services/scientific/medical-response";
+import { retrieveEvidence } from "@/services/scientific/retrieval";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -35,6 +41,11 @@ export default async function InquiryDetailPage({ params }: PageProps) {
   }
 
   const mode = getRuntimeMode();
+  const siDrafts = getDraftsForInquiry(inquiry.id);
+  const retrieval = retrieveEvidence({
+    query: inquiry.questionText,
+    limit: 4,
+  });
 
   return renderAppPage(
     inquiry.referenceCode,
@@ -123,9 +134,11 @@ export default async function InquiryDetailPage({ params }: PageProps) {
             </CardContent>
           </Card>
 
-          <Card className="shadow-none">
+          <Card className="shadow-none border-[#E5E7EB]">
             <CardHeader>
-              <CardTitle className="text-base">Evidence references</CardTitle>
+              <CardTitle className="text-base text-[#17212B]">
+                Evidence references
+              </CardTitle>
               <CardDescription>
                 Retrieved scientific content is untrusted until validated. Sample
                 links are illustrative.
@@ -143,7 +156,7 @@ export default async function InquiryDetailPage({ params }: PageProps) {
                   {inquiry.citations.map((citation) => (
                     <li
                       key={citation.id}
-                      className="rounded-lg border px-3 py-3 text-sm"
+                      className="rounded-lg border border-[#E5E7EB] px-3 py-3 text-sm"
                     >
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="font-medium">{citation.document.title}</p>
@@ -164,6 +177,70 @@ export default async function InquiryDetailPage({ params }: PageProps) {
                   ))}
                 </ul>
               )}
+            </CardContent>
+          </Card>
+
+          <ScientificSection
+            title="Scientific Intelligence retrieval"
+            description="Keyword retrieval over allowlisted teaching passages. Explicit no-evidence when nothing matches. Passages shown are the actual text used."
+          >
+            <p className="mb-3 text-[13px] leading-relaxed text-[#17212B]/65">
+              {SI_EVIDENCE_NOTICE}
+            </p>
+            {retrieval.noEvidence ? (
+              <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+                No allowlisted evidence passages matched this inquiry query.
+              </p>
+            ) : (
+              <ul className="divide-y divide-[#E5E7EB] border-y border-[#E5E7EB]">
+                {retrieval.hits.map((hit) => (
+                  <li key={hit.passage.id} className="space-y-2 py-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-medium text-[#17212B]">
+                        {hit.document.title}
+                      </p>
+                      <Badge variant="outline">
+                        {hit.document.verificationStatus.replaceAll("_", " ")}
+                      </Badge>
+                      <Badge variant="outline">
+                        score {hit.rankScore}
+                      </Badge>
+                    </div>
+                    <p className="text-xs uppercase tracking-wide text-[#17212B]/45">
+                      {hit.passage.passageKey}
+                      {hit.passage.sectionLabel
+                        ? ` · ${hit.passage.sectionLabel}`
+                        : ""}{" "}
+                      · doc v{hit.document.version}
+                    </p>
+                    <blockquote className="border-l-2 border-[#2563EB]/40 pl-3 text-[14px] leading-relaxed text-[#17212B]/80">
+                      {hit.passage.content}
+                    </blockquote>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </ScientificSection>
+
+          <Card className="shadow-none border-[#E5E7EB]">
+            <CardHeader>
+              <CardTitle className="text-base text-[#17212B]">
+                AI-assisted draft &amp; claim review
+              </CardTitle>
+              <CardDescription>
+                Structured drafts with claim-level reviewer statuses. Authorized
+                reviewers may edit statuses; no automatic approval or external
+                release.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ClaimReviewPanel
+                inquiryId={inquiry.id}
+                questionText={inquiry.questionText}
+                drafts={siDrafts}
+                canReview={canApproveInquiry(user.role)}
+                canDraft={canCreateInquiry(user.role)}
+              />
             </CardContent>
           </Card>
 

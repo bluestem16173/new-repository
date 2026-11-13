@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200" viewBox="0 0 320 200" role="img" aria-label="Rare Disease abstract illustration">
+  <rect width="320" height="200" fill="#F8FAFC"/>
+  <rect x="36" y="36" width="248" height="128" rx="10" fill="#EEF6F5"/>
+  <circle cx="110" cy="100" r="34" fill="#0F9D92" opacity="0.9"/>
+  <circle cx="150" cy="100" r="34" fill="#2563EB" opacity="0.55"/>
+  <rect x="200" y="72" width="64" height="10" rx="5" fill="#17212B" opacity="0.75"/>
+  <rect x="200" y="96" width="52" height="8" rx="4" fill="#94A3B8"/>
+  <rect x="200" y="118" width="44" height="8" rx="4" fill="#CBD5E1"/>
+</svg>
