@@ -37,13 +37,14 @@
 | File | Purpose | Applied to remote? |
 | --- | --- | --- |
 | `001_initial_schema.sql` | MI core | **Not yet** (remote empty at last check) |
-| `002_rls_policies.sql` | MI RLS | Not yet |
-| `003_field_medical_schema.sql` | Field Medical | Not yet |
-| `004_field_medical_rls.sql` | FM RLS | Not yet |
-| `005_scientific_intelligence.sql` | SI engine | Not yet |
-| `006_scientific_knowledge_network.sql` | Knowledge Network | Not yet |
-| `007_enterprise_security_foundation.sql` | Orgs + security audit | Not yet |
-| `008_database_foundation_alignment.sql` | Taxonomy, AI, PV, clinical demo | Not yet (prepared) |
+| `002_rls_policies.sql` | MI RLS | Applied |
+| `003_field_medical_schema.sql` | Field Medical | Applied |
+| `004_field_medical_rls.sql` | FM RLS | Applied |
+| `005_scientific_intelligence.sql` | SI engine | Applied |
+| `006_scientific_knowledge_network.sql` | Knowledge Network | Applied |
+| `007_enterprise_security_foundation.sql` | Orgs + security audit | Applied |
+| `008_database_foundation_alignment.sql` | Taxonomy, AI, PV, clinical demo | Applied |
+| `009_api_role_grants.sql` | API role GRANTs | Applied |
 
 ## Next steps after secure apply path
 
