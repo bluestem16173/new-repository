@@ -75,6 +75,22 @@ test.describe("MedIntel smoke", () => {
       page.getByRole("link", { name: /KOL Simulator/i }),
     ).toBeVisible();
   });
+
+  test("Scientific Knowledge Network search and item detail navigate", async ({
+    page,
+  }) => {
+    await page.goto("/knowledge");
+    await expect(
+      page.getByRole("heading", { name: "Scientific Knowledge Network" }),
+    ).toBeVisible();
+    await page.goto("/knowledge/search?q=GLP-1+cardiorenal");
+    await expect(
+      page.getByRole("heading", { name: "Search scientific knowledge" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /cardiorenal endpoints/i }),
+    ).toBeVisible();
+  });
 });
 
 

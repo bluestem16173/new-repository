@@ -7,6 +7,7 @@ import {
   Bot,
   BriefcaseMedical,
   LayoutDashboard,
+  Network,
   Settings,
   Stethoscope,
   Users,
@@ -23,6 +24,11 @@ const NAV_ITEMS: Array<{
     href: "/dashboard",
     label: "Dashboard",
     icon: LayoutDashboard,
+  },
+  {
+    href: "/knowledge",
+    label: "Knowledge Network",
+    icon: Network,
   },
   {
     href: "/medical-information",

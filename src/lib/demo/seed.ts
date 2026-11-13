@@ -53,6 +53,14 @@ export const demoUsers: User[] = [
     createdAt: "2026-01-10T10:00:00.000Z",
     updatedAt: "2026-01-10T10:00:00.000Z",
   },
+  {
+    id: "66666666-6666-4666-8666-666666666666",
+    email: "taylor.brooks@demo.medintel.local",
+    fullName: "Taylor Brooks",
+    role: "msl",
+    createdAt: "2026-01-10T10:00:00.000Z",
+    updatedAt: "2026-01-10T10:00:00.000Z",
+  },
 ];
 
 export const demoCurrentUserId = demoUsers[0].id;

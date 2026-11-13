@@ -28,9 +28,10 @@ export default async function AgentsCenterPage() {
           AI Agent Center
         </h2>
         <p className="max-w-3xl text-[16px] leading-[1.65] text-[#17212B]/70">
-          Fifteen MedIntel agents spanning evidence, Medical Information, Field
-          Medical, safety, and operations. Status labels reflect genuine
-          implementation — Active only when a real workflow is functional.
+          Sixteen MedIntel agents spanning evidence, Medical Information, Field
+          Medical, safety, operations, and knowledge matching. Status labels
+          reflect genuine implementation — Active only when a real workflow is
+          functional.
         </p>
         <p className="text-[14px] text-[#17212B]/60">
           {counts.active} {AGENT_STATUS_LABELS.active} ·{" "}

@@ -300,6 +300,41 @@ export const MEDINTEL_AGENTS: MedIntelAgent[] = [
     ],
   },
   {
+    id: "knowledge-matcher",
+    name: "Scientific Knowledge Matching",
+    description:
+      "Ranks approved reusable knowledge against new scientific questions with Zod-validated applicability warnings — never invents matches or citations.",
+    icon: iconFor("knowledge-matcher"),
+    category: "evidence",
+    status: "active",
+    route: "/agents/knowledge-matcher",
+    workflowHref: "/knowledge/search",
+    responsibilities: [
+      "Search approved knowledge with keyword/metadata filters",
+      "Return structured match results or explicit no-supported-match",
+      "Distinguish similarity from approved applicability",
+    ],
+    implementedCapabilities: [
+      "Approved-knowledge keyword matching service",
+      "Zod-validated match agent output",
+      "Knowledge suggestions on Medical Information inquiry detail",
+      "Knowledge Search workspace",
+    ],
+    plannedCapabilities: [
+      "pgvector semantic matching when embeddings are configured",
+      "Dedicated knowledge-matcher icon asset",
+    ],
+    permittedTools: [
+      "Knowledge Network search",
+      "Evidence Library (linked passages)",
+      "Inquiry detail match panel",
+    ],
+    reviewRequirements: [
+      "Human verification required before any external scientific use",
+      "Never auto-send responses to HCPs",
+    ],
+  },
+  {
     id: "evidence-watch",
     name: "Evidence Watch",
     description:

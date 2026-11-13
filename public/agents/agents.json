@@ -60,6 +60,10 @@
     {
       "id": "protocol-intelligence",
       "icon": "protocol-intelligence.v2.png"
+    },
+    {
+      "id": "knowledge-matcher",
+      "icon": "citation-auditor.v2.png"
     }
   ]
 }
