@@ -6,6 +6,8 @@ import { signOutAction } from "@/app/actions/auth";
 export function SignOutButton() {
   const [pending, startTransition] = useTransition();
   return (
+    <div className="flex items-center gap-3">
+    <a href="/change-password" className="text-xs text-blue-700 hover:underline">Change password</a>
     <button
       type="button"
       disabled={pending}
@@ -14,5 +16,6 @@ export function SignOutButton() {
     >
       {pending ? "…" : "Sign out"}
     </button>
+    </div>
   );
 }

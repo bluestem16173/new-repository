@@ -84,7 +84,7 @@ export function LoginForm() {
         </button>
       </div>
 
-      <nav aria-label="Account navigation" className="flex gap-4 text-sm text-[#2563EB]"><a href="/register">Create account</a><a href="/forgot-password">Forgot password</a></nav>
+      <nav aria-label="Account navigation" className="flex gap-4 text-sm text-[#2563EB]"><a href="/register">Create account</a><a href="/forgot-password">Forgot password</a><a href="/change-password">Change password after signing in</a></nav>
 
       <form
         onSubmit={mode === "password" ? onPasswordSubmit : onMagicSubmit}

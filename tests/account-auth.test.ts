@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-const mock = vi.hoisted(() => ({ signUp: vi.fn(), resetPasswordForEmail: vi.fn(), updateUser: vi.fn(), getUser: vi.fn(), signOut: vi.fn(), getCookie: vi.fn(), deleteCookie: vi.fn() }));
+const mock = vi.hoisted(() => ({ signUp: vi.fn(), resetPasswordForEmail: vi.fn(), updateUser: vi.fn(), getUser: vi.fn(), setSession: vi.fn(), setCookie: vi.fn(), signOut: vi.fn(), getCookie: vi.fn(), deleteCookie: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: vi.fn(async () => ({ auth: mock })) }));
-vi.mock("next/headers", () => ({ cookies: vi.fn(async () => ({ get: mock.getCookie, delete: mock.deleteCookie })) }));
-import { registerAccountAction, requestPasswordResetAction, updatePasswordAction } from "@/app/actions/account";
+vi.mock("next/headers", () => ({ cookies: vi.fn(async () => ({ get: mock.getCookie, set: mock.setCookie, delete: mock.deleteCookie })) }));
+import { changePasswordAction, completeLegacyRecoveryAction, registerAccountAction, requestPasswordResetAction, updatePasswordAction } from "@/app/actions/account";
 import { issueRecoveryMarker } from "@/lib/auth/recovery";
 import { registrationSchema } from "@/lib/auth/validation";
 import { allowAuthAttempt } from "@/lib/auth/rate-limit";
@@ -66,6 +66,33 @@ describe("account registration and recovery", () => {
     expect(await updatePasswordAction(valid)).toMatchObject({ ok: true, message: "Password updated. Sign in with your new password." });
     expect(mock.updateUser).toHaveBeenCalledWith({ password: valid.password });
     expect(mock.deleteCookie).toHaveBeenCalledWith("medintel-recovery");
+    expect(mock.signOut).toHaveBeenCalledWith({ scope: "global" });
+  });
+});
+
+describe("password changes and legacy recovery", () => {
+  it("rejects an unverified legacy session without granting recovery authorization", async () => {
+    mock.setSession.mockResolvedValue({ error: { code: "invalid_token" } });
+    expect((await completeLegacyRecoveryAction({ accessToken: "fixture", refreshToken: "fixture" })).ok).toBe(false);
+    expect(mock.setCookie).not.toHaveBeenCalled();
+  });
+  it("verifies legacy sessions server-side and signs a user-bound recovery cookie", async () => {
+    mock.setSession.mockResolvedValue({ error: null });
+    mock.getUser.mockResolvedValue({ data: { user: { id: "legacy-user" } }, error: null });
+    expect(await completeLegacyRecoveryAction({ accessToken: "fixture-access", refreshToken: "fixture-refresh" })).toMatchObject({ ok: true, destination: "/reset-password" });
+    expect(mock.getUser).toHaveBeenCalled();
+    expect(mock.setCookie).toHaveBeenCalledWith("medintel-recovery", expect.any(String), expect.objectContaining({ httpOnly: true, maxAge: 600 }));
+  });
+  it("rejects unauthenticated password changes", async () => {
+    mock.getUser.mockResolvedValue({ data: { user: null }, error: null });
+    expect((await changePasswordAction({ currentPassword: "old-password", password: valid.password, confirmPassword: valid.password })).ok).toBe(false);
+    expect(mock.updateUser).not.toHaveBeenCalled();
+  });
+  it("changes passwords only with a verified user and current password, then signs out", async () => {
+    mock.getUser.mockResolvedValue({ data: { user: { id: "changing-user" } }, error: null });
+    mock.updateUser.mockResolvedValue({ error: null }); mock.signOut.mockResolvedValue({ error: null });
+    expect(await changePasswordAction({ currentPassword: "old-password", password: valid.password, confirmPassword: valid.password })).toMatchObject({ ok: true, message: "Password updated. Sign in with your new password." });
+    expect(mock.updateUser).toHaveBeenCalledWith({ password: valid.password, current_password: "old-password" });
     expect(mock.signOut).toHaveBeenCalledWith({ scope: "global" });
   });
 });

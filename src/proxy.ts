@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { getRuntimeMode, getSupabasePublicConfig } from "@/lib/supabase/env";
 
-const PUBLIC_PATHS = ["/login", "/auth", "/favicon.ico", "/robots.txt", "/register", "/forgot-password", "/reset-password", "/onboarding"];
+const PUBLIC_PATHS = ["/login", "/auth", "/favicon.ico", "/robots.txt", "/register", "/forgot-password", "/reset-password", "/onboarding", "/change-password"];
 
 function isPublicPath(pathname: string): boolean {
   if (

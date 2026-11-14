@@ -1,3 +1,4 @@
+import { RecoveryLinkHandler } from "@/components/auth/recovery-link-handler";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col font-sans">
         <TooltipProvider>
+          <RecoveryLinkHandler />
           {children}
           <Toaster />
         </TooltipProvider>

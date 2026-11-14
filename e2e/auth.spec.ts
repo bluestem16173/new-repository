@@ -20,3 +20,14 @@ test("forgot-password and missing recovery link show actionable states", async (
   await expect(page.getByRole("main").getByRole("alert")).toContainText("missing, expired, invalid, or already used");
   await expect(page.getByRole("link", { name: "Request another reset link" })).toBeVisible();
 });
+
+test("legacy recovery fragments leave login and remove credentials from the URL", async ({ page }) => {
+  await page.goto("/login#access_token=fixture-access&refresh_token=fixture-refresh&type=recovery");
+  await expect(page).toHaveURL(/reset-password/);
+  await expect(page).not.toHaveURL(/access_token|refresh_token/);
+  await expect(page.getByRole("main").getByRole("alert")).toContainText("missing, expired, invalid, or already used");
+});
+test("password changes require a signed-in session", async ({ page }) => {
+  await page.goto("/change-password");
+  await expect(page.getByRole("main").getByRole("alert")).toContainText("unavailable until authentication is configured");
+});

@@ -122,3 +122,13 @@ Post-change checks: Auth users stayed at 5, profiles increased 4→5, membership
 Read-only verification switched to the nonprivileged authenticated database role with the target identity's controlled request claim: app role admin, one visible membership, own profile and organization authorized, and zero visible inquiry/knowledge rows from the other tenant. This is database-context authorization evidence, not a claim of a browser password sign-in or a JWT-signature test. The user must sign out/in and verify the deployed UI with their existing credentials.
 
 Security advisor still reports pre-existing mutable search paths, SECURITY DEFINER grants needing review and disabled leaked-password protection. SMTP/rate-limit and hosted callback settings remain unresolved; no email delivery or password change was attempted. No GitHub PR was merged or closed. Existing GitHub publishing permission remains blocked.
+
+## Additional recovery and password-change repair
+
+Added a root-level handler for legacy implicit recovery URL fragments, including links redirected to /login. It clears token fragments from browser history immediately, establishes the session on the server, verifies the user with Supabase Auth and sets the same signed user-bound recovery cookie used by PKCE/token-hash callbacks. Tokens are not forwarded to destination URLs or logged.
+
+Added /change-password for authenticated users, independently of organization membership. The action verifies the user and sends the current password plus the new password to Supabase Auth, then signs out globally. The installed SDK expects current_password (not the camel-case example in some docs). The recovery-only /reset-password guard remains intact.
+
+A read-only invalid-token redirect diagnostic, using the exact deployed recovery callback as redirect_to, fell back to http://localhost:3000. This confirms that the hosted callback is not accepted under the current URL configuration; correcting the Supabase Site URL/allowed redirects is required. The available MCP tools do not expose that configuration endpoint. No diagnostic email was sent.
+
+Validation for the additional repair: 99 unit/route tests, 11 Chromium browser tests, typecheck, lint and production build. A temporary privileged owner-password operation, if executed, must use the supported Auth admin API with a fixed verified target, short-lived capability authentication and immediate disabling afterward. No raw API key may leave the Edge Function. Never store password values or recovery tokens in the repository or audit metadata.
