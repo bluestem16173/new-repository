@@ -13,6 +13,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Sidebar } from "@/components/layout/sidebar";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 import { useState } from "react";
 
 interface HeaderProps {
@@ -74,6 +75,7 @@ export function Header({ title, user, runtimeMode }: HeaderProps) {
             {ROLE_LABELS[user.role]}
           </p>
         </div>
+        {runtimeMode === "supabase" ? <SignOutButton /> : null}
       </div>
     </header>
   );
