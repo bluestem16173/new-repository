@@ -81,13 +81,16 @@ export function EvaluationWalkthroughPanel({
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
+  const [appliedSignature, setAppliedSignature] = useState(sectionSignature);
 
-  useEffect(() => {
+  // Reset walkthrough when section identity/content changes (React "adjust state during render").
+  if (appliedSignature !== sectionSignature) {
+    setAppliedSignature(sectionSignature);
     setSteps(buildWalkthroughSteps(sectionInputs));
     setActiveIndex(null);
     setRunning(false);
     setFinalReport(null);
-  }, [sectionSignature, sectionInputs]);
+  }
 
   useEffect(() => {
     if (activeIndex === null) {

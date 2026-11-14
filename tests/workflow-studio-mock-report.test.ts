@@ -1,12 +1,33 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { User } from "@/domain/types";
+
+const gatewayMocks = vi.hoisted(() => {
+  const state = {
+    authorizeAiGatewayRequest: vi.fn(),
+    actualAuthorize: null as null | ((...args: never[]) => Promise<unknown>),
+  };
+  return state;
+});
+
+vi.mock("@/lib/security/ai-gateway", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/security/ai-gateway")>();
+  gatewayMocks.actualAuthorize =
+    actual.authorizeAiGatewayRequest as typeof gatewayMocks.actualAuthorize;
+  gatewayMocks.authorizeAiGatewayRequest.mockImplementation(
+    actual.authorizeAiGatewayRequest as (...args: never[]) => unknown,
+  );
+  return {
+    ...actual,
+    authorizeAiGatewayRequest: gatewayMocks.authorizeAiGatewayRequest,
+  };
+});
+
 import {
   buildAllowlistedReportContext,
   composeFixtureMockReport,
   generateWorkflowStudioMockReport,
 } from "@/services/workflow-studio/mock-report";
-import { authorizeAiGatewayRequest } from "@/lib/security/ai-gateway";
 import { hasOpenAiApiKey } from "@/lib/security/openai-env";
-import type { User } from "@/domain/types";
 
 const user: User = {
   id: "11111111-1111-4111-8111-111111111111",
@@ -16,6 +37,15 @@ const user: User = {
   createdAt: "",
   updatedAt: "",
 };
+
+beforeEach(() => {
+  gatewayMocks.authorizeAiGatewayRequest.mockReset();
+  if (gatewayMocks.actualAuthorize) {
+    gatewayMocks.authorizeAiGatewayRequest.mockImplementation(
+      gatewayMocks.actualAuthorize,
+    );
+  }
+});
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -55,16 +85,73 @@ describe("workflow studio mock reports", () => {
     expect(hasOpenAiApiKey()).toBe(false);
   });
 
+  it("prefers OPENAI_API_KEY over legacy OPENAI_API_Key", async () => {
+    vi.stubEnv("OPENAI_API_KEY", "sk-canonical-not-logged");
+    vi.stubEnv("OPENAI_API_Key", "sk-legacy-not-logged");
+    const fetchMock = vi.fn(async (_url: string, init?: RequestInit) => {
+      const auth = String(
+        (init?.headers as Record<string, string> | undefined)?.Authorization ??
+          "",
+      );
+      expect(auth).toBe("Bearer sk-canonical-not-logged");
+      expect(auth).not.toContain("legacy");
+      return {
+        ok: true,
+        json: async () => ({
+          choices: [
+            {
+              message: {
+                content: JSON.stringify({
+                  title: "Illustrative Manager Education Report (demo AI)",
+                  summary: "Synthetic manager education from fixtures.",
+                  sections: [
+                    {
+                      id: "learner-context",
+                      body: "Learner context.",
+                      agentIds: ["coaching-advisor"],
+                    },
+                  ],
+                }),
+              },
+            },
+          ],
+        }),
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const report = await generateWorkflowStudioMockReport({
+      workflowId: "manager-education",
+      user,
+    });
+    expect(fetchMock).toHaveBeenCalled();
+    expect(report.source).toBe("openai");
+  });
+
+  it("falls back to fixture compose when AI gateway authorization fails", async () => {
+    vi.stubEnv("OPENAI_API_Key", "sk-test-not-logged");
+    gatewayMocks.authorizeAiGatewayRequest.mockResolvedValueOnce({
+      ok: false,
+      reason: "denied for test",
+    });
+    const report = await generateWorkflowStudioMockReport({
+      workflowId: "kol-meeting-prep",
+      user,
+    });
+    expect(report.source).toBe("fixture_compose");
+    expect(report.summary).toContain("Provider authorization was unavailable");
+  });
+
   it("authorizes workflow mock report purpose for openai model when key present", async () => {
     vi.stubEnv("OPENAI_API_Key", "sk-test-not-logged");
-    const result = await authorizeAiGatewayRequest({
+    const result = (await gatewayMocks.authorizeAiGatewayRequest({
       agentId: "workflow-studio-mock-report",
       purpose: "workflow_studio_mock_report",
       inputChars: 200,
       estimatedOutputTokens: 100,
       model: "openai:gpt-4.1-mini",
       userId: user.id,
-    });
+    })) as { ok: boolean };
     expect(result.ok).toBe(true);
   });
 

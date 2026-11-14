@@ -138,9 +138,9 @@ Leave Supabase public env unset for local demo mode (default).
 
 ### Why Preview showed “Authentication configuration is unavailable”
 
-Vercel builds run with `NODE_ENV=production`. The edge proxy fails closed when public Supabase env is missing or partial — **except** `/workflow-studio`, which is allowed in illustrative **demo-read** mode when **both** public Supabase variables are fully unset.
+Vercel builds run with `NODE_ENV=production`. The edge proxy fails closed when public Supabase env is missing or partial — **except** illustrative demo surfaces (`/workflow-studio`, `/data-room`, `/agents`), which are allowed in **demo-read** mode when **both** public Supabase variables are fully unset.
 
-Other routes (`/dashboard`, Medical Information, Field Medical, etc.) stay closed until Auth is configured. When Supabase **is** configured, `/workflow-studio` is **not** an auth bypass — it requires a session like other app routes.
+Other routes (`/dashboard`, Medical Information, Field Medical, etc.) stay closed until Auth is configured. When Supabase **is** configured, those demo surfaces are **not** an auth bypass — they require a session. Pending-org accounts may still open them (Demo labels retained); full app routes still redirect to onboarding.
 
 ### Required public env (Preview + Production)
 
@@ -163,7 +163,11 @@ Set these in the Vercel project for **Preview** and **Production** (no secrets i
 5. **Redeploy** the Preview deployment (or push an empty commit / use Redeploy) so `NEXT_PUBLIC_*` values are baked into the build.
 6. Confirm Preview `/workflow-studio` loads. With Auth env present, sign-in is required for the rest of the app.
 
-**Without** setting Supabase public env on Preview: open `/workflow-studio` only (demo-read). Other paths return an actionable 503 naming the missing variable names (not values).
+**Without** setting Supabase public env on Preview: open `/workflow-studio`, `/data-room`, and `/agents` (demo-read). Other paths return an actionable 503 naming the missing variable names (not values).
+
+### Data Room (migration 013)
+
+`013_data_room_packages.sql` creates RLS-backed packages. Anon has no table grants (intentional). Authenticated senders with org membership create durable packages; schema-cache misses and demo runtime fall back to session-local demo memory with explicit UX messaging. Optional hardening: `014_data_room_grants_hardening.sql`.
 
 ## Verification
 

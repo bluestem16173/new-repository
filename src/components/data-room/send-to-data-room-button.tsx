@@ -62,7 +62,12 @@ export function SendToDataRoomButton({
       setPackageId(result.package.id);
       if (result.package.persistence === "demo_memory") {
         setPersistenceNote(
-          "Saved to demo memory (Data Room tables missing or demo mode). Apply migration 013 for durable org-shared packages.",
+          result.package.demoLabel ||
+            "Saved to demo memory (session-local). Durable org-shared packages require authenticated org membership and migration 013.",
+        );
+      } else {
+        setPersistenceNote(
+          "Saved under Supabase RLS (sender, same organization, or invite emails). Illustrative Demo only — no PHI.",
         );
       }
       setOpen(false);

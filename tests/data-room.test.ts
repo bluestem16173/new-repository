@@ -93,6 +93,29 @@ describe("data room packages", () => {
     ).toBe(false);
   });
 
+  it("surfaces demo-memory fallback messaging for UX", async () => {
+    const pkg = await sendPackageToDataRoom({
+      user: sender,
+      payload: {
+        title: "Fallback messaging packet",
+        summary: "Checks demo label communicates session-local limits.",
+        workflowType: "kol-meeting-prep",
+        sections: [
+          {
+            id: "visit-context",
+            title: "Visit Context",
+            body: "Synthetic only.",
+            agentIds: ["medical-drafting"],
+          },
+        ],
+        accessEmails: [],
+      },
+    });
+    expect(pkg.persistence).toBe("demo_memory");
+    expect(pkg.demoLabel.toLowerCase()).toMatch(/demo|fallback|in-memory/);
+    expect(pkg.oversightLabel.toLowerCase()).toContain("oversight");
+  });
+
   it("denies package detail to users outside access list", async () => {
     const pkg = await sendPackageToDataRoom({
       user: sender,

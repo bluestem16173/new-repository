@@ -321,7 +321,12 @@ export async function generateWorkflowStudioMockReport(input: {
   });
 
   if (!gate.ok) {
-    throw new Error(gate.reason);
+    // Keep mock report generation solid for demos: soft-fallback to fixtures.
+    const fallback = composeFixtureMockReport(input.workflowId);
+    return {
+      ...fallback,
+      summary: `${fallback.summary} Provider authorization was unavailable; composed from allowlisted fixtures only.`,
+    };
   }
 
   if (preferOpenAi && apiKey) {

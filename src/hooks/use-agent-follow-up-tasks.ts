@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useState, useTransition } from "react";
 import {
   buildAgentFollowUpTask,
   type AgentFollowUpTask,
@@ -13,13 +13,10 @@ import {
 import { createAgentFollowUpTaskAction } from "@/app/actions/workflow-studio";
 
 export function useAgentFollowUpTasks(workflowId?: string) {
-  const [tasks, setTasks] = useState<AgentFollowUpTask[]>([]);
+  // localStorage is empty during SSR; lazy init reads on the client first paint.
+  const [tasks, setTasks] = useState<AgentFollowUpTask[]>(() => readFollowUpTasks());
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    setTasks(readFollowUpTasks());
-  }, []);
 
   const persist = useCallback((next: AgentFollowUpTask[]) => {
     setTasks(next);

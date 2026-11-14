@@ -7,20 +7,22 @@ afterEach(() => {
 });
 
 describe("proxy hosted demo-read and auth-unavailable gate", () => {
-  it("allows /workflow-studio in production when public Supabase env is fully absent", async () => {
+  it("allows illustrative demo surfaces in production when public Supabase env is fully absent", async () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "");
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "");
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "");
 
-    const response = await proxy(
-      new NextRequest("https://preview.example/workflow-studio"),
-    );
+    for (const path of ["/workflow-studio", "/data-room", "/agents"]) {
+      const response = await proxy(
+        new NextRequest(`https://preview.example${path}`),
+      );
 
-    expect(response.status).toBe(200);
-    expect(response.headers.get("location")).toBeNull();
-    expect(response.headers.get("x-medintel-runtime-mode")).toBe("demo");
-    expect(response.headers.get("x-medintel-demo-read")).toBe("workflow-studio");
+      expect(response.status).toBe(200);
+      expect(response.headers.get("location")).toBeNull();
+      expect(response.headers.get("x-medintel-runtime-mode")).toBe("demo");
+      expect(response.headers.get("x-medintel-demo-read")).toBe("studio-surfaces");
+    }
   });
 
   it("still fails closed for other app routes in production without Supabase env", async () => {
@@ -39,6 +41,7 @@ describe("proxy hosted demo-read and auth-unavailable gate", () => {
     expect(body).toContain("NEXT_PUBLIC_SUPABASE_URL");
     expect(body).toContain("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY");
     expect(body).toContain("/workflow-studio");
+    expect(body).toContain("/data-room");
   });
 
   it("fails closed for /workflow-studio when configuration is partial", async () => {

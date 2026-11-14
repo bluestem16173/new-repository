@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { isDemoSurfacePath } from "@/lib/auth/demo-surfaces";
 import {
   getRuntimeMode,
   getSupabasePublicConfig,
@@ -8,9 +9,6 @@ import {
 } from "@/lib/supabase/env";
 
 const PUBLIC_PATHS = ["/login", "/auth", "/favicon.ico", "/robots.txt", "/register", "/forgot-password", "/reset-password", "/onboarding", "/change-password"];
-
-/** Frontend-only demo surface — safe to open when public Supabase env is fully absent. */
-const DEMO_READ_PATHS = ["/workflow-studio"];
 
 function isPublicPath(pathname: string): boolean {
   if (
@@ -30,12 +28,6 @@ function isPublicPath(pathname: string): boolean {
     return true;
   }
   return false;
-}
-
-function isDemoReadPath(pathname: string): boolean {
-  return DEMO_READ_PATHS.some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`),
-  );
 }
 
 function missingSupabasePublicEnvNames(): string[] {
@@ -74,9 +66,10 @@ function authConfigUnavailableResponse(missing: string[]): NextResponse {
   <ul>${missingList}</ul>
   <p>Set them for <strong>Preview</strong> and <strong>Production</strong> in the Vercel project, then redeploy. Never commit secret values.</p>
   <div class="note" role="note">
-    <strong>Workflow Studio demo:</strong> when both public Supabase variables are unset,
-    <code>/workflow-studio</code> remains available in illustrative demo-read mode.
-    Other application routes stay closed until Auth is configured.
+    <strong>Illustrative demo surfaces:</strong> when both public Supabase variables are unset,
+    <code>/workflow-studio</code>, <code>/data-room</code>, and <code>/agents</code> remain
+    available in demo-read mode (Demo labels retained). Other application routes stay closed
+    until Auth is configured.
   </div>
 </body>
 </html>`;
@@ -93,7 +86,7 @@ function authConfigUnavailableResponse(missing: string[]): NextResponse {
 /**
  * Edge gate: when Supabase is configured, require an authenticated session.
  * Local demo (missing public env, non-production) remains open for portfolio walkthrough.
- * Hosted production/preview without public env fails closed, except /workflow-studio demo-read.
+ * Hosted production/preview without public env fails closed, except illustrative demo surfaces.
  */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -105,13 +98,13 @@ export async function proxy(request: NextRequest) {
 
   if (!config) {
     const mode = getRuntimeMode();
-    // Fully absent public env + Workflow Studio: allow illustrative demo-read only.
+    // Fully absent public env + demo surfaces: allow illustrative demo-read only.
     // Does not open dashboard/MI/FM/etc., and does not bypass Auth when Supabase is configured.
-    if (mode === "demo" && isDemoReadPath(pathname)) {
+    if (mode === "demo" && isDemoSurfacePath(pathname)) {
       const response = NextResponse.next();
       applySecurityHeaders(response);
       response.headers.set("x-medintel-runtime-mode", "demo");
-      response.headers.set("x-medintel-demo-read", "workflow-studio");
+      response.headers.set("x-medintel-demo-read", "studio-surfaces");
       return response;
     }
     if (mode === "supabase" || process.env.NODE_ENV === "production") {
@@ -164,6 +157,13 @@ export async function proxy(request: NextRequest) {
     ? await supabase.from("organization_memberships").select("id").eq("profile_id", user.id).eq("organization_id", profile.organization_id).maybeSingle()
     : { data: null };
   if (!membership) {
+    // Pending-org accounts may still open illustrative demo surfaces after Auth.
+    if (isDemoSurfacePath(pathname)) {
+      applySecurityHeaders(response);
+      response.headers.set("x-medintel-runtime-mode", "supabase");
+      response.headers.set("x-medintel-org-status", "pending");
+      return response;
+    }
     const target = new URL("/onboarding", request.url);
     const pending = NextResponse.redirect(target);
     response.cookies.getAll().forEach(cookie => pending.cookies.set(cookie));

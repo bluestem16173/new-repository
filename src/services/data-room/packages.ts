@@ -148,10 +148,14 @@ export async function sendPackageToDataRoom(input: {
     throw new Error("Supabase client unavailable for Data Room.");
   }
 
+  // RLS allows organization_id null (sender + invite emails). Prefer durable insert
+  // even for pending-org accounts; same-org sharing activates once membership exists.
+  const organizationId = membership.organizationId;
+
   const { data, error } = await supabase
     .from("data_room_packages")
     .insert({
-      organization_id: membership.organizationId,
+      organization_id: organizationId,
       sender_profile_id: input.user.id,
       sender_email: input.user.email,
       sender_display_name: input.user.fullName,
@@ -173,7 +177,7 @@ export async function sendPackageToDataRoom(input: {
       payload: input.payload,
       accessEmails,
       reason:
-        "public.data_room_packages missing (apply migration 013_data_room_packages.sql). Session-local only until migration is applied.",
+        "public.data_room_packages missing from schema cache (apply or re-probe migration 013_data_room_packages.sql). Session-local only until the table is reachable.",
       generationSource,
       demoLabelOverride: `${demoLabel} (schema fallback: demo memory)`,
       oversightLabelOverride: oversightLabel,
@@ -196,9 +200,18 @@ export async function sendPackageToDataRoom(input: {
   }
 
   if (error || !data) {
-    throw new Error(
-      error?.message ?? "Unable to create Data Room package under RLS.",
-    );
+    const message = error?.message ?? "Unable to create Data Room package under RLS.";
+    const lowered = message.toLowerCase();
+    if (
+      lowered.includes("row-level security") ||
+      lowered.includes("violates row-level security") ||
+      error?.code === "42501"
+    ) {
+      throw new Error(
+        "Data Room send was blocked by access policy. Confirm you are signed in with an organization membership, then retry.",
+      );
+    }
+    throw new Error(message);
   }
 
   await supabase.from("data_room_access_events").insert({
