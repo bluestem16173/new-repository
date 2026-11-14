@@ -138,3 +138,15 @@ Review and approve migrations before production use; signup provisioning require
 The user subsequently authorized deployment. Git push returned HTTP 403 (write access denied). The connected GitHub branch-creation API independently returned 403, “Resource not accessible by integration.” No remote branch or pull request was created. Repository metadata reports account-level push permission, so the integration/token's write scope must be corrected rather than assuming the account lacks repository ownership.
 
 The repository has no GitHub deployment history or homepage URL and no Vercel CLI/hosting connection was available. The current site URL and hosting service have been requested. No deployment was performed. Local changes are committed, with a patch and Git bundle preserved in the workspace as recovery artifacts. Auth email throttling was reported by the user; its live quota, reset window and SMTP configuration could not be inspected.
+
+## Successful Vercel deployment after workspace authorization
+
+After the user approved access to the Vercel workspace, created project `medintel` (`prj_Pw2blDVfCM7Ar4EtsBQqYD7Dmf19`) under team `team_x7uSPx9UTwJMMgBC4RUrGkkr`, connected to GitHub repository ID 1053496638 (`bluestem16173/new-repository`). Configured Next.js, Node 22, npm ci and npm run build. Preserved the user's existing `new-repository` Vercel project.
+
+Deployed exact tracked source at commit `25716ac14cc221aca8eb725f389131480bcb6a14` directly through Vercel's source deployment API because GitHub still rejected publishing the local branch. This does not publish that branch or repair future Git-triggered deployments. Production deployment `dpl_Aa1bVrsAE7FEKiJc1CCwRs4pnkuB` reached READY and serves `https://medintel-sigma.vercel.app`.
+
+Configured Production environment keys: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, NEXT_PUBLIC_SITE_URL, MEDINTEL_AUTH_RECOVERY_SECRET, MEDINTEL_AI_MODE. The recovery secret was generated securely and saved as sensitive; its value is not recorded here. The Supabase URL/key were supplied by the user. No service-role credential was used. An earlier build lacking the newly supplied connection settings was canceled and replaced.
+
+Live read-only checks confirmed Supabase Auth health/settings HTTP 200, email authentication enabled, signup enabled and confirmation required. An anonymous profiles probe returned no rows; this does not prove authenticated RLS isolation. Authenticated Vercel fetches verified deployed Sign In, Create Account, Forgot Password, invalid-reset-link handling and the unauthenticated dashboard redirect to Sign In. No runtime error/fatal logs were returned for the deployment at the time of these checks; no log drains are configured. Vercel deployment protection was preserved.
+
+No actual sign-in, email delivery, password replacement or database migration was performed. Supabase redirect/template configuration, production migration approval and membership provisioning still require completion. The full application is not enterprise/demo-ready merely because deployment succeeded.

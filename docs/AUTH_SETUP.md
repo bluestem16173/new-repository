@@ -77,3 +77,13 @@ Passwords require 12–128 characters, with confirmation and provider password p
 ## “Email rate limit exceeded” troubleshooting
 
 This is a Supabase Auth/email-provider throttle, distinct from the application's supplemental per-email limiter. Stop repeatedly requesting reset links. Inspect Authentication → Rate Limits, Auth logs, SMTP settings and the configured email provider's quota. The default built-in mail service has restrictive sending limits and is unsuitable as a general production mail provider. Configure a verified custom SMTP sender for deployment. Exact limits/reset times depend on the project/provider; do not promise a specific wait without inspecting them. Do not disable confirmation, delete users, or bypass recovery to work around the throttle. Request one fresh recovery link only after the relevant window/quota permits it. A rate-limit error is not evidence of successful delivery.
+
+## Confirmed deployment origin
+
+The current MedIntel Vercel origin is `https://medintel-sigma.vercel.app`. Set Supabase Site URL to that exact origin, and allow these callback URLs:
+
+- `https://medintel-sigma.vercel.app/auth/callback?flow=recovery&next=/reset-password`
+- `https://medintel-sigma.vercel.app/auth/callback?flow=registration&next=/onboarding`
+- `https://medintel-sigma.vercel.app/auth/callback?next=/dashboard`
+
+For the optional direct token-hash recovery email template, use `https://medintel-sigma.vercel.app/auth/callback?token_hash={{ .TokenHash }}&type=recovery` as the recovery link. These Supabase administrative settings were not changed during the deployment.
