@@ -35,6 +35,19 @@ export function DataRoomPackageCard({ pkg }: DataRoomPackageCardProps) {
               <Lock className="size-3" aria-hidden />
               Auth-gated
             </Badge>
+            {pkg.generationSource === "openai_live" ? (
+              <Badge className="bg-[#2563EB] font-medium text-white">
+                Live OpenAI
+              </Badge>
+            ) : null}
+            {pkg.generationSource === "fixture_fallback_labeled" ? (
+              <Badge
+                variant="outline"
+                className="border-amber-300 bg-amber-50 font-medium text-amber-950"
+              >
+                Labeled fallback
+              </Badge>
+            ) : null}
           </div>
           <h3 className="text-[16px] font-semibold text-[#17212B] group-hover:text-[#1D4ED8]">
             {pkg.title}

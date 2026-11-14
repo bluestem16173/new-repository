@@ -2,6 +2,7 @@ import {
   DATA_ROOM_DEMO_NOTICE,
   DATA_ROOM_OVERSIGHT_LABEL,
   normalizeAccessEmails,
+  type DataRoomGenerationSource,
   type DataRoomPackage,
   type DataRoomSectionSnapshot,
   type SendToDataRoomInput,
@@ -72,6 +73,9 @@ function saveDemoPackage(input: {
   payload: SendToDataRoomInput;
   accessEmails: string[];
   reason: string;
+  generationSource?: DataRoomGenerationSource;
+  demoLabelOverride?: string;
+  oversightLabelOverride?: string;
 }): DataRoomPackage {
   const now = new Date().toISOString();
   const pkg: DataRoomPackage = {
@@ -80,8 +84,10 @@ function saveDemoPackage(input: {
     summary: input.payload.summary.trim(),
     workflowType: input.payload.workflowType,
     sections: input.payload.sections,
-    demoLabel: `${DATA_ROOM_DEMO_NOTICE} Fallback: ${input.reason}`,
-    oversightLabel: DATA_ROOM_OVERSIGHT_LABEL,
+    demoLabel:
+      input.demoLabelOverride ??
+      `${DATA_ROOM_DEMO_NOTICE} Fallback: ${input.reason}`,
+    oversightLabel: input.oversightLabelOverride ?? DATA_ROOM_OVERSIGHT_LABEL,
     senderId: input.user.id,
     senderEmail: input.user.email,
     senderDisplayName: input.user.fullName,
@@ -90,6 +96,7 @@ function saveDemoPackage(input: {
     createdAt: now,
     updatedAt: now,
     persistence: "demo_memory",
+    generationSource: input.generationSource ?? "manual_send",
   };
   demoSaveDataRoomPackage(pkg);
   return pkg;
@@ -98,10 +105,17 @@ function saveDemoPackage(input: {
 export async function sendPackageToDataRoom(input: {
   user: User;
   payload: SendToDataRoomInput;
+  generationSource?: DataRoomGenerationSource;
+  demoLabelOverride?: string;
+  oversightLabelOverride?: string;
 }): Promise<DataRoomPackage> {
   const accessEmails = normalizeAccessEmails(input.payload.accessEmails ?? []);
   const now = new Date().toISOString();
   const membership = await getCurrentUserOrganization();
+  const generationSource = input.generationSource ?? "manual_send";
+  const demoLabel = input.demoLabelOverride ?? DATA_ROOM_DEMO_NOTICE;
+  const oversightLabel =
+    input.oversightLabelOverride ?? DATA_ROOM_OVERSIGHT_LABEL;
 
   if (getRuntimeMode() === "demo") {
     const pkg = saveDemoPackage({
@@ -109,6 +123,9 @@ export async function sendPackageToDataRoom(input: {
       payload: input.payload,
       accessEmails,
       reason: "demo runtime (in-memory only).",
+      generationSource,
+      demoLabelOverride: demoLabel,
+      oversightLabelOverride: oversightLabel,
     });
     await recordSecurityAuditEvent({
       actorId: input.user.id,
@@ -119,6 +136,7 @@ export async function sendPackageToDataRoom(input: {
       metadata: {
         workflowType: pkg.workflowType,
         persistence: "demo_memory",
+        generationSource,
         inviteCount: accessEmails.length,
       },
     });
@@ -141,8 +159,8 @@ export async function sendPackageToDataRoom(input: {
       summary: input.payload.summary.trim(),
       workflow_type: input.payload.workflowType,
       sections: input.payload.sections,
-      demo_label: DATA_ROOM_DEMO_NOTICE,
-      oversight_label: DATA_ROOM_OVERSIGHT_LABEL,
+      demo_label: demoLabel,
+      oversight_label: oversightLabel,
       access_emails: accessEmails,
       audit_created_at: now,
     })
@@ -156,6 +174,9 @@ export async function sendPackageToDataRoom(input: {
       accessEmails,
       reason:
         "public.data_room_packages missing (apply migration 013_data_room_packages.sql). Session-local only until migration is applied.",
+      generationSource,
+      demoLabelOverride: `${demoLabel} (schema fallback: demo memory)`,
+      oversightLabelOverride: oversightLabel,
     });
     await recordSecurityAuditEvent({
       actorId: input.user.id,
@@ -167,6 +188,7 @@ export async function sendPackageToDataRoom(input: {
         workflowType: pkg.workflowType,
         persistence: "demo_memory",
         fallback: "schema_missing",
+        generationSource,
         inviteCount: accessEmails.length,
       },
     });
@@ -195,11 +217,15 @@ export async function sendPackageToDataRoom(input: {
     metadata: {
       workflowType: input.payload.workflowType,
       persistence: "supabase",
+      generationSource,
       inviteCount: accessEmails.length,
     },
   });
 
-  return mapRow(data as Record<string, unknown>);
+  return {
+    ...mapRow(data as Record<string, unknown>),
+    generationSource,
+  };
 }
 
 export async function listAccessibleDataRoomPackages(input: {

@@ -2,6 +2,7 @@ import { connection } from "next/server";
 import Link from "next/link";
 import { Archive } from "lucide-react";
 import { DataRoomPackageCard } from "@/components/data-room/data-room-package-card";
+import { LivePipelineSession } from "@/components/data-room/live-pipeline-session";
 import { DemoOversightBanner } from "@/components/workflow-studio/demo-oversight-banner";
 import { DATA_ROOM_DEMO_NOTICE } from "@/domain/data-room/types";
 import { renderAppPage } from "@/lib/page";
@@ -26,13 +27,15 @@ async function DataRoomPageContent() {
           Data Room
         </h2>
         <p className="max-w-3xl text-[16px] leading-[1.65] text-[#17212B]/70">
-          Authenticated colleagues retrieve Workflow Studio packages you send
-          here. Access is limited to the sender, same-organization members, or
-          an explicit invite email list — never a public anonymous dump.
+          Run a live staged OpenAI session, approve each agent from your phone,
+          then retrieve the compiled package. Access stays gated to sender,
+          same-org colleagues, or explicit invite emails.
         </p>
       </header>
 
       <DemoOversightBanner label={DATA_ROOM_DEMO_NOTICE} />
+
+      <LivePipelineSession defaultWorkflowId="kol-meeting-prep" />
 
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#E5E7EB] bg-[#FAFBFC] px-4 py-3">
         <div className="flex items-center gap-2 text-[13px] text-[#17212B]/70">
@@ -55,8 +58,8 @@ async function DataRoomPageContent() {
             No packages yet
           </p>
           <p className="mx-auto mt-2 max-w-md text-[13px] leading-relaxed text-[#17212B]/60">
-            Generate or open a KOL / Manager deliverable in Workflow Studio,
-            then use <span className="font-medium">Send to Data Room</span>.
+            Start a <span className="font-medium">live staged session</span>{" "}
+            above, or send a deliverable from Workflow Studio.
           </p>
         </div>
       ) : (

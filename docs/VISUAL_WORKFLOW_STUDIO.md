@@ -61,6 +61,20 @@ Never put OpenAI credentials in `NEXT_PUBLIC_*`.
 - Migration: `supabase/migrations/013_data_room_packages.sql` (does not weaken existing RLS)
 - No public anonymous medical content dump; no PHI
 
+### Live staged OpenAI session (employer-wow path)
+
+On `/data-room` and KOL/Manager Workflow Studio pathways:
+
+1. **Start live session** — multi-stage pipeline (Literature Scout → … → Final Report → Data Room)
+2. Each stage calls OpenAI (`OPENAI_API_KEY` or `OPENAI_API_Key`) over allowlisted fixture RAG context
+3. Dense compiled cards with agent attribution + Illustrative Demo / oversight labels
+4. **You must Approve** each stage before the next runs (mobile sticky approve bar)
+5. Session state persists in browser localStorage (phone refresh safe) + server run mirror
+6. Missing key / API errors fail clearly; optional **labeled fixture fallback** only when you opt in
+7. Final approve compiles a Data Room package with Live OpenAI / labeled-fallback badges
+
+**Preview:** after setting the OpenAI key in Vercel Preview env, redeploy so live stages can call the provider. Never put secrets in `NEXT_PUBLIC_*`.
+
 ## Canvas
 
 - Library: `@xyflow/react` (React Flow 12)

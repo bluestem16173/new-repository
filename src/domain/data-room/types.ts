@@ -18,6 +18,11 @@ export type DataRoomSectionSnapshot = {
   agentIds: string[];
 };
 
+export type DataRoomGenerationSource =
+  | "openai_live"
+  | "fixture_fallback_labeled"
+  | "manual_send";
+
 export type DataRoomPackage = {
   id: string;
   title: string;
@@ -34,7 +39,28 @@ export type DataRoomPackage = {
   createdAt: string;
   updatedAt: string;
   persistence: "supabase" | "demo_memory";
+  /** How the package content was produced. */
+  generationSource?: DataRoomGenerationSource;
 };
+
+export const liveGenerateDataRoomInputSchema = z.object({
+  workflowType: z.enum(["kol-meeting-prep", "manager-education"]),
+  accessEmails: z.array(z.string().email().max(200)).max(25).default([]),
+  /** Explicit opt-in only — never silent. Labels package as fixture fallback. */
+  allowLabeledFixtureFallback: z.boolean().default(false),
+});
+
+export type LiveGenerateDataRoomInput = z.infer<
+  typeof liveGenerateDataRoomInputSchema
+>;
+
+export type LiveGenerateProgressStage =
+  | "preparing_context"
+  | "calling_openai"
+  | "validating_json"
+  | "persisting_package"
+  | "complete"
+  | "error";
 
 export const sendToDataRoomInputSchema = z.object({
   title: z.string().min(1).max(240),

@@ -90,6 +90,14 @@ vi.mock("@/app/actions/data-room", () => ({
   sendToDataRoomAction: vi.fn(),
 }));
 
+vi.mock("@/app/actions/data-room-live", () => ({
+  startLivePipelineAction: vi.fn(),
+  runLivePipelineStageAction: vi.fn(),
+  approveLivePipelineStageAction: vi.fn(),
+  finalizeLivePipelineAction: vi.fn(),
+  getLivePipelineRunAction: vi.fn(),
+}));
+
 afterEach(() => {
   cleanup();
 });
@@ -119,14 +127,18 @@ describe("WorkflowStudioApp interactions", () => {
       screen.getByRole("heading", { name: /KOL Meeting Prep Packet/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Illustrative Demo · Human oversight required/i),
-    ).toBeInTheDocument();
+      screen.getAllByText(/Illustrative Demo · Human oversight required/i)
+        .length,
+    ).toBeGreaterThan(0);
     expect(
       screen.getByRole("button", { name: /Send to Data Room/i }),
     ).toBeInTheDocument();
     expect(
       screen.getAllByRole("button", { name: /Evaluate with agent/i }).length,
     ).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("button", { name: /Start live session/i }),
+    ).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /2\. Evidence Analyst/i }));
     expect(screen.getByText(/Retrieve allowlisted passages/i)).toBeInTheDocument();

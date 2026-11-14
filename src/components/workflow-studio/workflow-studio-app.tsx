@@ -14,10 +14,12 @@ import type {
   WorkflowStudioId,
 } from "@/domain/workflow-studio/types";
 import { Button } from "@/components/ui/button";
+import { LivePipelineSession } from "@/components/data-room/live-pipeline-session";
 import { DetailsPanel } from "@/components/workflow-studio/details-panel";
 import { DeliverablePanel } from "@/components/workflow-studio/deliverable-panel";
 import { MockReportPanel } from "@/components/workflow-studio/mock-report-panel";
 import { WorkflowCanvas } from "@/components/workflow-studio/workflow-canvas";
+import { isMockReportWorkflowId } from "@/domain/workflow-studio/mock-report";
 import { cn } from "@/lib/utils";
 
 type StudioView = "roles" | "canvas";
@@ -352,6 +354,10 @@ export function WorkflowStudioApp() {
               setSelectedNodeId(match?.id ?? null);
             }}
           />
+
+          {isMockReportWorkflowId(workflow.id) ? (
+            <LivePipelineSession defaultWorkflowId={workflow.id} />
+          ) : null}
         </section>
       ) : null}
     </div>

@@ -13,6 +13,10 @@ export const WORKFLOW_STUDIO_MOCK_REPORT_PURPOSE =
 export const WORKFLOW_STUDIO_SECTION_EVAL_PURPOSE =
   "workflow_studio_section_evaluation" as const;
 
+/** Narrow purpose for live Data Room package generation via OpenAI. */
+export const DATA_ROOM_LIVE_PACKAGE_PURPOSE =
+  "data_room_live_package" as const;
+
 const gatewayRequestSchema = z.object({
   agentId: z.string().min(1).max(80),
   purpose: z.string().min(1).max(200),
@@ -125,8 +129,12 @@ export async function authorizeAiGatewayRequest(
     parsed.data.purpose === WORKFLOW_STUDIO_MOCK_REPORT_PURPOSE;
   const isWorkflowStudioSectionEval =
     parsed.data.purpose === WORKFLOW_STUDIO_SECTION_EVAL_PURPOSE;
+  const isDataRoomLivePackage =
+    parsed.data.purpose === DATA_ROOM_LIVE_PACKAGE_PURPOSE;
   const isWorkflowStudioAllowlistedPurpose =
-    isWorkflowStudioMockReport || isWorkflowStudioSectionEval;
+    isWorkflowStudioMockReport ||
+    isWorkflowStudioSectionEval ||
+    isDataRoomLivePackage;
 
   if (isWorkflowStudioAllowlistedPurpose) {
     if (model === "openai:gpt-4.1-mini" && !hasOpenAiApiKey()) {
