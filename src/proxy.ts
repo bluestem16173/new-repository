@@ -1,8 +1,16 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import { getRuntimeMode, getSupabasePublicConfig } from "@/lib/supabase/env";
+import {
+  getRuntimeMode,
+  getSupabasePublicConfig,
+  getSupabasePublishableKey,
+  getSupabaseUrl,
+} from "@/lib/supabase/env";
 
 const PUBLIC_PATHS = ["/login", "/auth", "/favicon.ico", "/robots.txt", "/register", "/forgot-password", "/reset-password", "/onboarding", "/change-password"];
+
+/** Frontend-only demo surface — safe to open when public Supabase env is fully absent. */
+const DEMO_READ_PATHS = ["/workflow-studio"];
 
 function isPublicPath(pathname: string): boolean {
   if (
@@ -24,9 +32,68 @@ function isPublicPath(pathname: string): boolean {
   return false;
 }
 
+function isDemoReadPath(pathname: string): boolean {
+  return DEMO_READ_PATHS.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
+  );
+}
+
+function missingSupabasePublicEnvNames(): string[] {
+  const missing: string[] = [];
+  if (!getSupabaseUrl()) {
+    missing.push("NEXT_PUBLIC_SUPABASE_URL");
+  }
+  if (!getSupabasePublishableKey()) {
+    missing.push(
+      "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (or NEXT_PUBLIC_SUPABASE_ANON_KEY)",
+    );
+  }
+  return missing;
+}
+
+function authConfigUnavailableResponse(missing: string[]): NextResponse {
+  const missingList =
+    missing.length > 0
+      ? missing.map((name) => `<li><code>${name}</code></li>`).join("")
+      : "<li><code>NEXT_PUBLIC_SUPABASE_URL</code> and a publishable/anon key</li>";
+  const body = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Authentication configuration unavailable</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #17212b; line-height: 1.5; }
+    code { background: #f1f5f9; padding: 0.1rem 0.35rem; border-radius: 4px; }
+    .note { margin-top: 1.25rem; padding: 0.85rem 1rem; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Authentication configuration is unavailable</h1>
+  <p>Contact your administrator. This hosted deployment is missing required public Supabase environment variables:</p>
+  <ul>${missingList}</ul>
+  <p>Set them for <strong>Preview</strong> and <strong>Production</strong> in the Vercel project, then redeploy. Never commit secret values.</p>
+  <div class="note" role="note">
+    <strong>Workflow Studio demo:</strong> when both public Supabase variables are unset,
+    <code>/workflow-studio</code> remains available in illustrative demo-read mode.
+    Other application routes stay closed until Auth is configured.
+  </div>
+</body>
+</html>`;
+
+  return new NextResponse(body, {
+    status: 503,
+    headers: {
+      "content-type": "text/html; charset=utf-8",
+      "cache-control": "no-store",
+    },
+  });
+}
+
 /**
  * Edge gate: when Supabase is configured, require an authenticated session.
- * Demo mode (missing public env) remains open for portfolio walkthrough.
+ * Local demo (missing public env, non-production) remains open for portfolio walkthrough.
+ * Hosted production/preview without public env fails closed, except /workflow-studio demo-read.
  */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -37,8 +104,18 @@ export async function proxy(request: NextRequest) {
   const config = getSupabasePublicConfig();
 
   if (!config) {
-    if (getRuntimeMode() === "supabase" || process.env.NODE_ENV === "production") {
-      return new NextResponse("Authentication configuration is unavailable. Contact your administrator.", { status: 503 });
+    const mode = getRuntimeMode();
+    // Fully absent public env + Workflow Studio: allow illustrative demo-read only.
+    // Does not open dashboard/MI/FM/etc., and does not bypass Auth when Supabase is configured.
+    if (mode === "demo" && isDemoReadPath(pathname)) {
+      const response = NextResponse.next();
+      applySecurityHeaders(response);
+      response.headers.set("x-medintel-runtime-mode", "demo");
+      response.headers.set("x-medintel-demo-read", "workflow-studio");
+      return response;
+    }
+    if (mode === "supabase" || process.env.NODE_ENV === "production") {
+      return authConfigUnavailableResponse(missingSupabasePublicEnvNames());
     }
     const response = NextResponse.next();
     applySecurityHeaders(response);

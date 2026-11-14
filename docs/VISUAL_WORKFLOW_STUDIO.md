@@ -96,6 +96,39 @@ npm run dev
 
 Open [http://localhost:3000/workflow-studio](http://localhost:3000/workflow-studio).
 
+Leave Supabase public env unset for local demo mode (default).
+
+## Hosted Vercel Preview / Production
+
+### Why Preview showed “Authentication configuration is unavailable”
+
+Vercel builds run with `NODE_ENV=production`. The edge proxy fails closed when public Supabase env is missing or partial — **except** `/workflow-studio`, which is allowed in illustrative **demo-read** mode when **both** public Supabase variables are fully unset.
+
+Other routes (`/dashboard`, Medical Information, Field Medical, etc.) stay closed until Auth is configured. When Supabase **is** configured, `/workflow-studio` is **not** an auth bypass — it requires a session like other app routes.
+
+### Required public env (Preview + Production)
+
+Set these in the Vercel project for **Preview** and **Production** (no secrets in git):
+
+| Variable | Required for Auth | Notes |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Project URL |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Yes (preferred) | Or legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY` |
+| `NEXT_PUBLIC_SITE_URL` | Yes for Auth redirects | Canonical HTTPS origin for that deployment |
+| `MEDINTEL_AUTH_RECOVERY_SECRET` | Yes for recovery cookies | Server-only; 32+ random characters |
+| `SUPABASE_SERVICE_ROLE_KEY` | Optional | Server-only admin ops — never `NEXT_PUBLIC_*` |
+
+### Exact Vercel dashboard steps
+
+1. Open the **medintel** project in Vercel → **Settings** → **Environment Variables**.
+2. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or `NEXT_PUBLIC_SUPABASE_ANON_KEY`) using the same values as the working Production deployment (or the Supabase project API settings). Enable **Preview** and **Production**.
+3. Add `NEXT_PUBLIC_SITE_URL` for Production (e.g. `https://medintel-sigma.vercel.app`). For Preview auth redirects, either use a stable preview domain policy or rely on demo-read for Workflow Studio only.
+4. Add server-only `MEDINTEL_AUTH_RECOVERY_SECRET` for Preview + Production if Auth recovery must work on that deployment.
+5. **Redeploy** the Preview deployment (or push an empty commit / use Redeploy) so `NEXT_PUBLIC_*` values are baked into the build.
+6. Confirm Preview `/workflow-studio` loads. With Auth env present, sign-in is required for the rest of the app.
+
+**Without** setting Supabase public env on Preview: open `/workflow-studio` only (demo-read). Other paths return an actionable 503 naming the missing variable names (not values).
+
 ## Verification
 
 ```bash
@@ -105,10 +138,10 @@ npm run test
 npm run build
 ```
 
-Frontend fixture/adapter coverage: `tests/workflow-studio.test.ts`.
+Frontend fixture/adapter coverage: `tests/workflow-studio.test.ts`.  
+Proxy demo-read / 503 coverage: `tests/proxy-demo-read.test.ts`.
 
 ## Merge readiness
 
 - Isolated feature branch for visual evaluation
-- **Do not merge / deploy** until product review after Auth stack stabilization (per program notes)
-- No PR required for overnight evaluation unless explicitly requested
+- Prefer Preview env parity with Production for full-app walkthroughs; Workflow Studio alone works in demo-read without secrets
