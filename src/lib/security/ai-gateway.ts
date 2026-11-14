@@ -1,8 +1,13 @@
 import { z } from "zod";
 import { recordSecurityAuditEvent } from "@/lib/security/audit";
+import { hasOpenAiApiKey } from "@/lib/security/openai-env";
 import { getRuntimeMode } from "@/lib/supabase/env";
 
 export type AiOperatingMode = "demo" | "byok" | "enterprise";
+
+/** Narrow purpose for Workflow Studio illustrative mock reports (RAG over fixtures). */
+export const WORKFLOW_STUDIO_MOCK_REPORT_PURPOSE =
+  "workflow_studio_mock_report" as const;
 
 const gatewayRequestSchema = z.object({
   agentId: z.string().min(1).max(80),
@@ -112,8 +117,29 @@ export async function authorizeAiGatewayRequest(
     }
   }
 
-  if (mode !== "demo" || model !== "demo-synthetic") {
-    return { ok: false, reason: "Live AI execution is unavailable until authenticated durable budgets, provider execution, and usage accounting are implemented." };
+  const isWorkflowStudioMockReport =
+    parsed.data.purpose === WORKFLOW_STUDIO_MOCK_REPORT_PURPOSE;
+
+  if (isWorkflowStudioMockReport) {
+    if (model === "openai:gpt-4.1-mini" && !hasOpenAiApiKey()) {
+      return {
+        ok: false,
+        reason:
+          "OpenAI API key is not configured on the server (OPENAI_API_KEY or OPENAI_API_Key).",
+      };
+    }
+    if (model !== "openai:gpt-4.1-mini" && model !== "demo-synthetic") {
+      return {
+        ok: false,
+        reason: "Workflow Studio mock reports only allow openai:gpt-4.1-mini or demo-synthetic.",
+      };
+    }
+  } else if (mode !== "demo" || model !== "demo-synthetic") {
+    return {
+      ok: false,
+      reason:
+        "Live AI execution is unavailable until authenticated durable budgets, provider execution, and usage accounting are implemented.",
+    };
   }
 
   const usage = getUsage();

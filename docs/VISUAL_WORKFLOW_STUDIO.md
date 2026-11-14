@@ -38,6 +38,17 @@ All product names, KOLs, metrics, and citations are fictional/synthetic. No fabr
 
 There is **no** simulated network latency, fake streaming AI, fake token counters, or fake run timers.
 
+### Generate mock report (KOL Meeting Prep + Manager Education)
+
+On those two pathways, **Generate mock report** calls a server action that:
+
+- Builds an allowlisted synthetic fixture context (RAG-style grounding)
+- Optionally uses server-only `OPENAI_API_KEY` or legacy `OPENAI_API_Key` via the AI gateway
+- Falls back to fixture composition if the provider is unavailable
+- Labels output as Illustrative Demo AI requiring human oversight (never auto-released)
+
+Never put OpenAI credentials in `NEXT_PUBLIC_*`.
+
 ## Canvas
 
 - Library: `@xyflow/react` (React Flow 12)

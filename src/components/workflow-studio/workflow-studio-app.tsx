@@ -16,6 +16,7 @@ import type {
 import { Button } from "@/components/ui/button";
 import { DetailsPanel } from "@/components/workflow-studio/details-panel";
 import { DeliverablePanel } from "@/components/workflow-studio/deliverable-panel";
+import { MockReportPanel } from "@/components/workflow-studio/mock-report-panel";
 import { WorkflowCanvas } from "@/components/workflow-studio/workflow-canvas";
 import { cn } from "@/lib/utils";
 
@@ -327,6 +328,8 @@ export function WorkflowStudioApp() {
             deliverable={workflow.deliverable}
             open={showDeliverable}
           />
+
+          <MockReportPanel workflowId={workflow.id} />
         </section>
       ) : null}
     </div>
