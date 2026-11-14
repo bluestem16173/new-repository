@@ -51,6 +51,13 @@ export function EvaluationWalkthroughPanel({
   onHighlightAgent,
   onHighlightSection,
 }: EvaluationWalkthroughPanelProps) {
+  const sectionSignature = sections
+    .map(
+      (section) =>
+        `${section.id}:${section.title}:${section.agentIds.join(",")}`,
+    )
+    .join("|");
+
   const sectionInputs = useMemo(
     () =>
       sections.map((section) => ({
@@ -59,7 +66,10 @@ export function EvaluationWalkthroughPanel({
         body: section.body,
         agentIds: section.agentIds,
       })),
-    [sections],
+    // Intentional: rebuild only when section identity/content signature changes,
+    // not when parent passes a fresh array reference each render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [sectionSignature],
   );
 
   const [steps, setSteps] = useState<WalkthroughStep[]>(() =>
@@ -77,7 +87,7 @@ export function EvaluationWalkthroughPanel({
     setActiveIndex(null);
     setRunning(false);
     setFinalReport(null);
-  }, [sectionInputs]);
+  }, [sectionSignature, sectionInputs]);
 
   useEffect(() => {
     if (activeIndex === null) {
