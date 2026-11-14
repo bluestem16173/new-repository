@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MedIntel Capstone — Visual Product Storyboard</title>
+  <style>
+    :root {
+      --ink: #0f1c24;
+      --muted: #4a5d68;
+      --line: #d7e0e6;
+      --paper: #f7fafb;
+      --card: #ffffff;
+      --teal: #0e7490;
+      --teal-soft: #e0f4f8;
+      --amber: #92400e;
+      --amber-bg: #fff7ed;
+      --danger-soft: #fef3c7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 600px at 10% -10%, #d9f3f7 0%, transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, #e8eef2 0%, transparent 50%),
+        var(--paper);
+      line-height: 1.5;
+    }
+    .banner {
+      background: var(--amber-bg);
+      color: var(--amber);
+      border-bottom: 1px solid #f5d0a9;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.92rem;
+      text-align: center;
+    }
+    header.hero {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 1.5rem;
+    }
+    .eyebrow {
+      display: inline-block;
+      background: var(--teal-soft);
+      color: var(--teal);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+    }
+    h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.1;
+      margin: 0.75rem 0 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    .lede { color: var(--muted); max-width: 48rem; font-size: 1.1rem; }
+    nav.toc {
+      max-width: 1100px;
+      margin: 0 auto 1.5rem;
+      padding: 0 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    nav.toc a {
+      text-decoration: none;
+      color: var(--teal);
+      border: 1px solid var(--line);
+      background: var(--card);
+      padding: 0.4rem 0.7rem;
+      border-radius: 0.5rem;
+      font-size: 0.85rem;
+    }
+    main { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem 4rem; }
+    section.page {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin: 1.25rem 0;
+      box-shadow: 0 10px 30px rgba(15, 28, 36, 0.04);
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    section.page h2 {
+      margin: 0 0 0.35rem;
+      font-size: 1.45rem;
+      letter-spacing: -0.01em;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+    }
+    .shot {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 0.75rem;
+      display: block;
+      background: #eef3f6;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 820px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+    .arch {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.78rem;
+      background: #0f1c24;
+      color: #d7f0f5;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    .callout {
+      background: var(--danger-soft);
+      border: 1px solid #fcd34d;
+      border-radius: 0.75rem;
+      padding: 0.9rem 1rem;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+    }
+    ul.tight { margin: 0.4rem 0 0; padding-left: 1.2rem; }
+    ul.tight li { margin: 0.25rem 0; }
+    footer {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1.5rem 3rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.75rem 0 1rem; }
+    .chip {
+      font-size: 0.75rem;
+      border-radius: 999px;
+      padding: 0.25rem 0.6rem;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--muted);
+    }
+    .chip.on { background: var(--teal-soft); color: var(--teal); border-color: #a5d8e2; }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    Independent demonstration · Synthetic / illustrative data only · Not for clinical decision-making · AI never auto-released
+  </div>
+
+  <header class="hero">
+    <span class="eyebrow">Capstone visual product file</span>
+    <h1>MedIntel</h1>
+    <p class="lede">
+      Medical Affairs intelligence workspace for Medical Information, Field Medical, Knowledge reuse,
+      agent-guided pathways, and auth-gated package sharing — with governance-first demo labeling.
+    </p>
+    <div class="chip-row">
+      <span class="chip on">MI</span>
+      <span class="chip on">Field Medical</span>
+      <span class="chip on">Knowledge</span>
+      <span class="chip on">Agent Center</span>
+      <span class="chip on">Workflow Studio</span>
+      <span class="chip on">Data Room</span>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Storyboard pages">
+    <a href="#architecture">Architecture</a>
+    <a href="#dashboard">Dashboard</a>
+    <a href="#mi">Medical Information</a>
+    <a href="#field">Field Medical</a>
+    <a href="#knowledge">Knowledge</a>
+    <a href="#agents">Agent Center</a>
+    <a href="#studio">Workflow Studio</a>
+    <a href="#dataroom">Data Room</a>
+    <a href="#governance">Governance</a>
+  </nav>
+
+  <main>
+    <section class="page" id="architecture">
+      <h2>1 · Architecture overview</h2>
+      <p class="meta">Governance shell around MI · Field Medical · Knowledge · Evidence · Agents · Workflow Studio → Data Room.</p>
+      <div class="arch">Governance: demo banner · RBAC · audit · human medical review gates
+   │
+   ├── Medical Information (inquiry lifecycle)
+   ├── Field Medical (MSL / coaching / simulations / analytics)
+   ├── Knowledge Network (search · review · reuse)
+   ├── Evidence Library (illustrative metadata; untrusted until review)
+   ├── AI Agent Center (16-agent registry + status integrity)
+   ├── Workflow Studio * (role pathways + canvas; no live execution)
+   └── Data Room * (auth-gated illustrative packages)
+
+* Demo-preview modules (feature screenshots). Synthetic only.</div>
+      <div class="callout">
+        OpenAI live literature / generative HCP is <strong>not implemented</strong>. Demo responses are deterministic and allowlisted.
+        Knowledge ROI figures are <strong>scenario estimates</strong>, not validated savings.
+      </div>
+    </section>
+
+    <section class="page" id="dashboard">
+      <h2>2 · Product shell &amp; dashboard</h2>
+      <p class="meta">Brand-forward entry: Clinical Intelligence, Scientific Evidence &amp; Medical Affairs Excellence.</p>
+      <img class="shot" src="screenshots/dashboard.png" alt="MedIntel dashboard with module shortcuts and therapeutic areas" />
+    </section>
+
+    <section class="page" id="mi">
+      <h2>3 · Medical Information</h2>
+      <p class="meta">Validated Phase 1: intake → evidence → draft → medical review → approve. Only medical_reviewer/admin may approve.</p>
+      <div class="grid-2">
+        <img class="shot" src="screenshots/medical-information.png" alt="Medical Information inquiry list" />
+        <img class="shot" src="screenshots/mi-inquiry-detail.png" alt="Medical Information inquiry detail" />
+      </div>
+      <ul class="tight">
+        <li>Fictional products labeled explicitly (e.g. NeuvoPath, AtheraLyn).</li>
+        <li>Claim-level draft review; responses never auto-released.</li>
+      </ul>
+    </section>
+
+    <section class="page" id="field">
+      <h2>4 · Field Medical Excellence</h2>
+      <p class="meta">Deterministic synthetic corpus for MSL competency, coaching, simulations, and leadership analytics.</p>
+      <div class="grid-2">
+        <img class="shot" src="screenshots/field-medical.png" alt="Field Medical overview" />
+        <img class="shot" src="screenshots/field-medical-analytics.png" alt="Field Medical analytics" />
+      </div>
+      <ul class="tight">
+        <li>Simulation scores do not auto-certify formal readiness.</li>
+        <li>Coaching → later score links are observational only.</li>
+      </ul>
+    </section>
+
+    <section class="page" id="knowledge">
+      <h2>5 · Scientific Knowledge Network</h2>
+      <p class="meta">MSL A → MI draft → authorized approval → MSL B reuse. Never auto-sent to HCPs.</p>
+      <img class="shot" src="screenshots/knowledge-network.png" alt="Scientific Knowledge Network overview" />
+    </section>
+
+    <section class="page" id="agents">
+      <h2>6 · AI Agent Center</h2>
+      <p class="meta">Sixteen agents with honest status: Demonstration only · Configured but unavailable · Not implemented.</p>
+      <img class="shot" src="screenshots/agent-center.png" alt="AI Agent Center portfolio grid" />
+      <ul class="tight">
+        <li>Active demo examples: Inquiry Triage, KOL Simulator, Coaching Advisor, Bottleneck Analyst.</li>
+        <li>Agents never auto-approve medical responses or regulatory reporting.</li>
+      </ul>
+    </section>
+
+    <section class="page" id="studio">
+      <h2>7 · Workflow Studio (demo preview)</h2>
+      <p class="meta">Role dashboards and React Flow pathways. Frontend prototype — no live agent execution.</p>
+      <div class="grid-2">
+        <img class="shot" src="screenshots/workflow-studio-role-dashboard.png" alt="Workflow Studio role dashboard" />
+        <img class="shot" src="screenshots/workflow-studio-canvas-details.png" alt="Workflow Studio agent canvas" />
+      </div>
+      <img class="shot" style="margin-top:1rem" src="screenshots/kol-deliverable-structured.png" alt="KOL Meeting Prep deliverable with agent-owned sections" />
+    </section>
+
+    <section class="page" id="dataroom">
+      <h2>8 · Data Room (demo preview)</h2>
+      <p class="meta">Auth-gated retrieval of Workflow Studio packages. Illustrative demo data · no PHI · human oversight required.</p>
+      <div class="grid-2">
+        <img class="shot" src="screenshots/data-room-list.png" alt="Data Room package list" />
+        <img class="shot" src="screenshots/data-room-package-detail.png" alt="Data Room package detail" />
+      </div>
+    </section>
+
+    <section class="page" id="governance">
+      <h2>9 · Governance checklist</h2>
+      <ul class="tight">
+        <li>Independent demonstration — not affiliated with any pharmaceutical company.</li>
+        <li>All showcase screenshots use synthetic / illustrative content.</li>
+        <li>No fabricated real literature citations; placeholders are teaching-only.</li>
+        <li>Not for clinical decision-making; provisional AI/draft content requires human oversight.</li>
+        <li>Demo mode state is in-memory; unsuitable as a concurrent public recruiter sandbox without further isolation work.</li>
+        <li>Do not claim full enterprise production readiness from this portfolio alone.</li>
+      </ul>
+      <p class="meta" style="margin-top:1rem">Companion: <code>MedIntel-Capstone-Showcase.pptx</code> · markdown narrative in Project docs.</p>
+    </section>
+  </main>
+
+  <footer>
+    MedIntel Capstone storyboard · screenshots captured from local demo mode and existing Workflow Studio / Data Room artifacts · Nov 2026
+  </footer>
+</body>
+</html>
