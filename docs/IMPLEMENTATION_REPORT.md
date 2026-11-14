@@ -150,3 +150,21 @@ Configured Production environment keys: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SU
 Live read-only checks confirmed Supabase Auth health/settings HTTP 200, email authentication enabled, signup enabled and confirmation required. An anonymous profiles probe returned no rows; this does not prove authenticated RLS isolation. Authenticated Vercel fetches verified deployed Sign In, Create Account, Forgot Password, invalid-reset-link handling and the unauthenticated dashboard redirect to Sign In. No runtime error/fatal logs were returned for the deployment at the time of these checks; no log drains are configured. Vercel deployment protection was preserved.
 
 No actual sign-in, email delivery, password replacement or database migration was performed. Supabase redirect/template configuration, production migration approval and membership provisioning still require completion. The full application is not enterprise/demo-ready merely because deployment succeeded.
+
+## Approved production Auth repair and administrator provisioning
+
+The user explicitly approved migrations 010–012 and requested repair of the owner-confirmed administrator account. Applied through Supabase migration tooling:
+
+| Repository migration | Supabase version | Recorded name |
+| --- | --- | --- |
+| 010 | 20261114002350 | identity_and_tenant_guards |
+| 011 | 20261114002405 | registration_profiles |
+| 012 | 20261114002414 | backfill_pending_profiles |
+
+A trusted administrative transaction then upgraded only the confirmed existing account to application admin and inserted its admin membership in medintel-demo. It rejected conflicting existing tenant assignments, changed no Auth identity/password/confirmation, granted no isolation-test-tenant membership, and wrote an admin.access.bootstrap audit event. No permanent bootstrap RPC was exposed.
+
+Post-change checks: Auth users stayed at 5, profiles increased 4→5, memberships 4→5, organizations stayed at 2, inquiries stayed at 111 and knowledge items stayed at 45. No missing profiles remain; all public tables retain RLS. The new organization helper is executable by authenticated but not anon. Its trigger helpers have no direct client execution grants.
+
+Read-only verification switched to the nonprivileged authenticated database role with the target identity's controlled request claim: app role admin, one visible membership, own profile and organization authorized, and zero visible inquiry/knowledge rows from the other tenant. This is database-context authorization evidence, not a claim of a browser password sign-in or a JWT-signature test. The user must sign out/in and verify the deployed UI with their existing credentials.
+
+Security advisor still reports pre-existing mutable search paths, SECURITY DEFINER grants needing review and disabled leaked-password protection. SMTP/rate-limit and hosted callback settings remain unresolved; no email delivery or password change was attempted. No GitHub PR was merged or closed. Existing GitHub publishing permission remains blocked.

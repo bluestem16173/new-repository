@@ -11,7 +11,7 @@ as $$
       and p.organization_id = target
   );
 $$;
-revoke all on function public.has_current_org(uuid) from public;
+revoke all on function public.has_current_org(uuid) from public, anon;
 grant execute on function public.has_current_org(uuid) to authenticated;
 
 -- Remove recursive self-reference in membership SELECT policy.
@@ -35,6 +35,7 @@ begin
   return new;
 end;
 $$;
+revoke all on function public.guard_profile_authority() from public, anon, authenticated;
 create trigger profiles_guard_authority before update on public.profiles
 for each row execute function public.guard_profile_authority();
 
@@ -64,6 +65,7 @@ begin
   return new;
 end;
 $$;
+revoke all on function public.guard_independent_knowledge_approval() from public, anon, authenticated;
 create trigger knowledge_independent_approval before insert or update on public.knowledge_items
 for each row execute function public.guard_independent_knowledge_approval();
 commit;

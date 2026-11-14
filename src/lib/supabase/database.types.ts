@@ -2618,6 +2618,7 @@ export type Database = {
       }
       fm_director_id_for_user: { Args: never; Returns: string }
       fm_is_leader: { Args: never; Returns: boolean }
+      has_current_org: { Args: { target: string }; Returns: boolean }
       is_org_member: { Args: { target_org: string }; Returns: boolean }
       user_organization_id: { Args: never; Returns: string }
     }

@@ -1,5 +1,7 @@
 # MedIntel PR consolidation review
 
+Current update: migrations 010–012 are now approved and applied; administrator authorization is provisioned and verified under the authenticated database role. Browser password sign-in and actual email delivery are not verified. GitHub publishing still returns 403, and no PR has been merged. Earlier findings below retain the original audit snapshot; the final production-update section records the completed changes.
+
 ## Recommendation
 
 Prepare **one integration PR from codex/medintel-integration-repair into main**. Do not merge it until the authentication/database release gates below are resolved and the resulting scope is approved. No PR was merged, closed or retargeted during this audit.
@@ -94,3 +96,21 @@ Custom SMTP/delivery; hosted Auth redirect settings; explicit production migrati
 Application validation: typecheck, lint, all 93 unit/route tests, all 9 Chromium tests and production build passed. All 9 isolated PostgreSQL check groups passed. Migration files 001–009 are unchanged. Final merge-tree simulation remains conflict-free; main has no unique commits relative to the integration branch at this snapshot. The feature stack's original 18 commits remain ancestors of the repaired integration branch.
 
 The draft PR title/body is preserved in INTEGRATION_PR_DRAFT.md. Publishing the branch was retried after validation and still failed with HTTP 403. Therefore no integration PR was opened and no original PR was merged, closed, retargeted or declared superseded. Production migrations 010–012 and the least-privilege profile backfill remain unapplied pending explicit approval.
+
+## Approved production Auth repair and administrator provisioning
+
+The user explicitly approved migrations 010–012 and requested repair of the owner-confirmed administrator account. Applied through Supabase migration tooling:
+
+| Repository migration | Supabase version | Recorded name |
+| --- | --- | --- |
+| 010 | 20261114002350 | identity_and_tenant_guards |
+| 011 | 20261114002405 | registration_profiles |
+| 012 | 20261114002414 | backfill_pending_profiles |
+
+A trusted administrative transaction then upgraded only the confirmed existing account to application admin and inserted its admin membership in medintel-demo. It rejected conflicting existing tenant assignments, changed no Auth identity/password/confirmation, granted no isolation-test-tenant membership, and wrote an admin.access.bootstrap audit event. No permanent bootstrap RPC was exposed.
+
+Post-change checks: Auth users stayed at 5, profiles increased 4→5, memberships 4→5, organizations stayed at 2, inquiries stayed at 111 and knowledge items stayed at 45. No missing profiles remain; all public tables retain RLS. The new organization helper is executable by authenticated but not anon. Its trigger helpers have no direct client execution grants.
+
+Read-only verification switched to the nonprivileged authenticated database role with the target identity's controlled request claim: app role admin, one visible membership, own profile and organization authorized, and zero visible inquiry/knowledge rows from the other tenant. This is database-context authorization evidence, not a claim of a browser password sign-in or a JWT-signature test. The user must sign out/in and verify the deployed UI with their existing credentials.
+
+Security advisor still reports pre-existing mutable search paths, SECURITY DEFINER grants needing review and disabled leaked-password protection. SMTP/rate-limit and hosted callback settings remain unresolved; no email delivery or password change was attempted. No GitHub PR was merged or closed. Existing GitHub publishing permission remains blocked.
