@@ -88,3 +88,9 @@ The latest npm audit snapshot reports 12 dependency findings (2 low, 10 moderate
 ## Remaining blockers before merge approval
 
 Custom SMTP/delivery; hosted Auth redirect settings; explicit production migration/backfill approval; user membership provisioning when needed; GitHub integration write access; formal code review/CI; full FM/SI/knowledge operational adapters and comprehensive child-table tenant policies. The proposed PR may be opened as a draft while these are resolved, but the application is not declared enterprise-ready.
+
+## Final audit outcome
+
+Application validation: typecheck, lint, all 93 unit/route tests, all 9 Chromium tests and production build passed. All 9 isolated PostgreSQL check groups passed. Migration files 001–009 are unchanged. Final merge-tree simulation remains conflict-free; main has no unique commits relative to the integration branch at this snapshot. The feature stack's original 18 commits remain ancestors of the repaired integration branch.
+
+The draft PR title/body is preserved in INTEGRATION_PR_DRAFT.md. Publishing the branch was retried after validation and still failed with HTTP 403. Therefore no integration PR was opened and no original PR was merged, closed, retargeted or declared superseded. Production migrations 010–012 and the least-privilege profile backfill remain unapplied pending explicit approval.
