@@ -1,6 +1,11 @@
 "use server";
 
 import {
+  createAgentFollowUpTaskInputSchema,
+  buildAgentFollowUpTask,
+  type AgentFollowUpTask,
+} from "@/domain/workflow-studio/agent-follow-up-tasks";
+import {
   isMockReportWorkflowId,
   type GeneratedMockReport,
 } from "@/domain/workflow-studio/mock-report";
@@ -40,6 +45,34 @@ export async function generateWorkflowStudioMockReportAction(
       error instanceof Error
         ? error.message
         : "Unable to generate mock report.";
+    return { ok: false, error: message };
+  }
+}
+
+export type CreateFollowUpTaskResult =
+  | { ok: true; task: AgentFollowUpTask }
+  | { ok: false; error: string };
+
+/** Validates and stamps a demo follow-up task. Client persists to localStorage. */
+export async function createAgentFollowUpTaskAction(
+  raw: unknown,
+): Promise<CreateFollowUpTaskResult> {
+  try {
+    const parsed = createAgentFollowUpTaskInputSchema.safeParse(raw);
+    if (!parsed.success) {
+      return { ok: false, error: "Invalid follow-up task payload." };
+    }
+
+    await requireUser({
+      action: "workflow_studio.follow_up_task",
+      resourceType: "workflow_studio",
+      resourceId: parsed.data.workflowId,
+    });
+
+    return { ok: true, task: buildAgentFollowUpTask(parsed.data) };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Unable to create follow-up task.";
     return { ok: false, error: message };
   }
 }

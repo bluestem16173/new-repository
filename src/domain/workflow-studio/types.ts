@@ -63,10 +63,19 @@ export interface WorkflowEdgeFixture {
   label?: string;
 }
 
+export interface WorkflowDeliverableSection {
+  heading: string;
+  body: string;
+  /** Optional typed section id for agent-linked report UIs. */
+  id?: string;
+  /** Owning agent ids when the section is agent-attributed. */
+  agentIds?: string[];
+}
+
 export interface WorkflowDeliverable {
   title: string;
   summary: string;
-  sections: Array<{ heading: string; body: string }>;
+  sections: WorkflowDeliverableSection[];
   disclaimer: string;
 }
 

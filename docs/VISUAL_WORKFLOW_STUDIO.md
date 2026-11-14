@@ -38,16 +38,27 @@ All product names, KOLs, metrics, and citations are fictional/synthetic. No fabr
 
 There is **no** simulated network latency, fake streaming AI, fake token counters, or fake run timers.
 
-### Generate mock report (KOL Meeting Prep + Manager Education)
+### Structured deliverables + agent follow-up (KOL Meeting Prep + Manager Education)
 
-On those two pathways, **Generate mock report** calls a server action that:
+Pathway deliverables and **Generate mock report** share a polished packet UI:
 
-- Builds an allowlisted synthetic fixture context (RAG-style grounding)
-- Optionally uses server-only `OPENAI_API_KEY` or legacy `OPENAI_API_Key` via the AI gateway
-- Falls back to fixture composition if the provider is unavailable
-- Labels output as Illustrative Demo AI requiring human oversight (never auto-released)
+- Typed sections (Visit Context, Key Evidence, Talking Points, Coaching Plan, etc.)
+- Owning-agent chips linking to `/agents/[id]`
+- **Evaluate with agent** / **Add to agent task** → demo follow-up task list (validated server-side, persisted in browser localStorage; clearly labeled demo)
+- Illustrative Demo / human oversight banners retained
+- **Send to Data Room** creates an auth-gated retrieval package for colleagues
+
+Mock report generation prefers structured JSON sections + `agentIds` from OpenAI (`response_format: json_object`), with graceful fixture-compose fallback.
 
 Never put OpenAI credentials in `NEXT_PUBLIC_*`.
+
+### Data Room
+
+- Routes: `/data-room`, `/data-room/[packageId]`
+- Access: authenticated sender, same organization (Supabase + RLS), or explicit invite email list
+- Demo mode: in-memory store (not durable across restarts)
+- Migration: `supabase/migrations/013_data_room_packages.sql` (does not weaken existing RLS)
+- No public anonymous medical content dump; no PHI
 
 ## Canvas
 
@@ -88,12 +99,11 @@ Swap via `setWorkflowOrchestrationAdapter` in tests or a future integration — 
 
 ## Out of scope (intentionally untouched)
 
-- Supabase migrations / schemas / RLS
-- API routes
-- Auth logic / authorization matrices
-- AI gateway
-- Agent execution services
+- Live agent execution / orchestration backends
 - Agent registry contents (read-only usage of ids/icons/names)
+- Weakening auth or RLS for convenience
+
+Additive Data Room migration `013_data_room_packages.sql` is included; apply only through normal migration review.
 
 ## Preview locally
 

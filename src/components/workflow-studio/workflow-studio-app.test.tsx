@@ -49,6 +49,28 @@ vi.mock("@/components/workflow-studio/workflow-canvas", () => ({
   ),
 }));
 
+vi.mock("@/app/actions/workflow-studio", () => ({
+  generateWorkflowStudioMockReportAction: vi.fn(),
+  createAgentFollowUpTaskAction: vi.fn(async (input: {
+    sectionId: string;
+    agentId: string;
+    note: string;
+    workflowId: string;
+  }) => ({
+    ok: true,
+    task: {
+      id: `aft-${input.sectionId}`,
+      ...input,
+      status: "open",
+      createdAt: new Date().toISOString(),
+    },
+  })),
+}));
+
+vi.mock("@/app/actions/data-room", () => ({
+  sendToDataRoomAction: vi.fn(),
+}));
+
 afterEach(() => {
   cleanup();
 });
@@ -77,6 +99,15 @@ describe("WorkflowStudioApp interactions", () => {
     expect(
       screen.getByRole("heading", { name: /KOL Meeting Prep Packet/i }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Illustrative Demo · Human oversight required/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Send to Data Room/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByRole("button", { name: /Evaluate with agent/i }).length,
+    ).toBeGreaterThan(0);
 
     await user.click(screen.getByRole("button", { name: /2\. Evidence Analyst/i }));
     expect(screen.getByText(/Retrieve allowlisted passages/i)).toBeInTheDocument();

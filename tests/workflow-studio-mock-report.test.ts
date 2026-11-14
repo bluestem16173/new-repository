@@ -27,16 +27,24 @@ describe("workflow studio mock reports", () => {
     const context = buildAllowlistedReportContext("kol-meeting-prep");
     expect(context).toContain("KOL Meeting Prep");
     expect(context).toContain("Literature Scout");
+    expect(context).toContain("visit-context");
     expect(context.toLowerCase()).toMatch(/illustrative|synthetic|fictional/);
-    expect(context).not.toMatch(/10\.\d{4}\/\S+/); // no real DOI patterns invented here
+    expect(context).not.toMatch(/10\.\d{4}\/\S+/);
   });
 
-  it("composes a fixture mock report with oversight labeling", () => {
+  it("composes structured fixture sections with agent ownership", () => {
     const report = composeFixtureMockReport("manager-education");
     expect(report.source).toBe("fixture_compose");
+    expect(report.sections.length).toBeGreaterThanOrEqual(6);
+    expect(report.sections.every((section) => section.agentIds.length > 0)).toBe(
+      true,
+    );
     expect(report.body).toContain("Illustrative Demo");
     expect(report.oversightLabel.toLowerCase()).toContain("oversight");
     expect(report.title.toLowerCase()).toContain("education");
+    expect(report.sections.some((section) => section.id === "coaching-plan")).toBe(
+      true,
+    );
   });
 
   it("reads either OPENAI_API_KEY or OPENAI_API_Key without exposing values", () => {
@@ -60,7 +68,7 @@ describe("workflow studio mock reports", () => {
     expect(result.ok).toBe(true);
   });
 
-  it("generates via OpenAI when key present and fetch succeeds", async () => {
+  it("generates via OpenAI structured JSON when key present and fetch succeeds", async () => {
     vi.stubEnv("OPENAI_API_Key", "sk-test-not-logged");
     vi.stubGlobal(
       "fetch",
@@ -70,8 +78,53 @@ describe("workflow studio mock reports", () => {
           choices: [
             {
               message: {
-                content:
-                  "# Illustrative Demo Data\nSynthetic KOL briefing from allowlisted fixtures only.",
+                content: JSON.stringify({
+                  title: "Illustrative KOL Meeting Prep Report (demo AI)",
+                  summary:
+                    "Synthetic KOL briefing from allowlisted fixtures only.",
+                  sections: [
+                    {
+                      id: "visit-context",
+                      body: "Visit context from fixtures.",
+                      agentIds: ["medical-drafting", "literature-scout"],
+                    },
+                    {
+                      id: "background",
+                      body: "Background from fixtures.",
+                      agentIds: ["literature-scout", "evidence-analyst"],
+                    },
+                    {
+                      id: "key-evidence",
+                      body: "Key evidence from fixtures.",
+                      agentIds: ["evidence-analyst", "literature-scout"],
+                    },
+                    {
+                      id: "talking-points",
+                      body: "Talking points from fixtures.",
+                      agentIds: ["knowledge-matcher", "medical-drafting"],
+                    },
+                    {
+                      id: "anticipated-questions",
+                      body: "Questions from fixtures.",
+                      agentIds: ["kol-simulator"],
+                    },
+                    {
+                      id: "protocol-insights",
+                      body: "Protocol insights from fixtures.",
+                      agentIds: ["protocol-intelligence"],
+                    },
+                    {
+                      id: "open-items",
+                      body: "Open items from fixtures.",
+                      agentIds: ["medical-drafting", "case-completeness"],
+                    },
+                    {
+                      id: "prep-actions",
+                      body: "Prep actions from fixtures.",
+                      agentIds: ["medical-drafting", "coaching-advisor"],
+                    },
+                  ],
+                }),
               },
             },
           ],
@@ -84,6 +137,8 @@ describe("workflow studio mock reports", () => {
       user,
     });
     expect(report.source).toBe("openai");
+    expect(report.sections).toHaveLength(8);
+    expect(report.sections[0]?.agentIds).toContain("literature-scout");
     expect(report.body).toContain("Illustrative Demo");
     expect(report.oversightLabel).toContain("oversight");
   });
@@ -104,6 +159,7 @@ describe("workflow studio mock reports", () => {
       user,
     });
     expect(report.source).toBe("fixture_compose");
-    expect(report.body).toContain("Provider generation was unavailable");
+    expect(report.summary).toContain("Provider generation was unavailable");
+    expect(report.sections.length).toBeGreaterThan(0);
   });
 });

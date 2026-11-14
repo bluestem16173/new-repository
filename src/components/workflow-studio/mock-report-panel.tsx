@@ -8,6 +8,7 @@ import {
   type GeneratedMockReport,
 } from "@/domain/workflow-studio/mock-report";
 import type { WorkflowStudioId } from "@/domain/workflow-studio/types";
+import { StructuredDeliverableView } from "@/components/workflow-studio/structured-deliverable-view";
 import { Button } from "@/components/ui/button";
 
 interface MockReportPanelProps {
@@ -37,7 +38,7 @@ export function MockReportPanel({ workflowId }: MockReportPanelProps) {
 
   return (
     <section
-      className="rounded-xl border border-[#E5E7EB] bg-white p-5"
+      className="rounded-xl border border-[#E5E7EB] bg-white p-5 sm:p-6"
       aria-labelledby="mock-report-heading"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -49,9 +50,9 @@ export function MockReportPanel({ workflowId }: MockReportPanelProps) {
             Generate mock report
           </h3>
           <p className="max-w-2xl text-[13px] leading-relaxed text-[#17212B]/70">
-            Creates an illustrative demo report from allowlisted synthetic
-            fixture context only. Output requires human oversight and is never
-            auto-released as verified medical content.
+            Creates a structured illustrative demo report from allowlisted
+            synthetic fixture context. Prefer JSON sections with owning agents;
+            falls back to fixture compose when the provider is unavailable.
           </p>
         </div>
         <Button
@@ -76,31 +77,24 @@ export function MockReportPanel({ workflowId }: MockReportPanelProps) {
       ) : null}
 
       {report ? (
-        <article
-          className="mt-4 space-y-3 rounded-lg border border-amber-200 bg-amber-50/60 p-4"
-          aria-live="polite"
-        >
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="text-[14px] font-semibold text-[#17212B]">
-              {report.title}
-            </p>
-            <span className="rounded-md border border-amber-300 bg-white px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-950">
-              Demo AI output
-            </span>
-            <span className="rounded-md border border-[#E5E7EB] bg-white px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[#17212B]/60">
-              {report.source === "openai" ? "provider" : "fixture compose"}
-            </span>
-          </div>
-          <p className="text-[12px] leading-relaxed text-amber-950" role="note">
-            {report.oversightLabel}
-          </p>
-          <pre className="max-h-[28rem] overflow-auto whitespace-pre-wrap rounded-md border border-[#E5E7EB] bg-white p-3 text-[13px] leading-relaxed text-[#17212B]">
-            {report.body}
-          </pre>
-          <p className="text-[11px] text-[#17212B]/50">
-            Generated at {new Date(report.generatedAt).toLocaleString()}
-          </p>
-        </article>
+        <div className="mt-5" aria-live="polite">
+          <StructuredDeliverableView
+            workflowId={report.workflowId}
+            title={report.title}
+            summary={report.summary}
+            sections={report.sections.map((section) => ({
+              id: section.id,
+              title: section.title,
+              body: section.body,
+              agentIds: section.agentIds,
+            }))}
+            sourceLabel={
+              report.source === "openai" ? "provider JSON" : "fixture compose"
+            }
+            generatedAt={report.generatedAt}
+            disclaimer={report.oversightLabel}
+          />
+        </div>
       ) : null}
     </section>
   );

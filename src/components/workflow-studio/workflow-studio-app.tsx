@@ -325,6 +325,7 @@ export function WorkflowStudioApp() {
           </div>
 
           <DeliverablePanel
+            workflowId={workflow.id}
             deliverable={workflow.deliverable}
             open={showDeliverable}
           />
