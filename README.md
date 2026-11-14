@@ -4,6 +4,15 @@ Independent demonstration portfolio for pharmaceutical **Medical Affairs** and *
 
 **Not affiliated with any pharmaceutical company. All data is synthetic. Not for clinical decision-making.**
 
+## Capstone showcase
+
+Portfolio narrative, HTML storyboard, screenshots, and PowerPoint:
+
+- [`docs/CAPSTONE.md`](docs/CAPSTONE.md)
+- [`docs/capstone/`](docs/capstone/) — `MedIntel-Capstone-Showcase.pptx`, storyboard HTML, screenshots
+
+Workflow Studio and Data Room visuals are **demo-preview** materials (synthetic packages; no live agent execution).
+
 ## Phase 1 scope
 
 | Area | Status |
