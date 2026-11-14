@@ -38,7 +38,7 @@ Use a Reset Password template with the canonical application host hardcoded to t
 
 The callback calls `verifyOtp({ token_hash, type: 'recovery' })`, writes the resulting Auth cookies, marks the verified recovery identity, and always redirects to `/reset-password`. It never forwards token material to the destination. Use this only in the recovery template; registration keeps its confirmation template. Never construct redirect targets from user-supplied hosts.
 
-Previously issued links with implicit `#access_token` fragments or links targeting `/login` are not converted into recovery authorization. Request a fresh link after correcting the template. Do not add a client-side session bypass. Disable callback query-string capture in hosting/access logs and analytics; never send token hashes to telemetry. Callback responses use `no-store` and `no-referrer`.
+Legacy implicit recovery fragments, including valid links targeting `/login`, are now handled by the root recovery handler and verified server-side before issuing recovery authorization. Expired links or links targeting another origin still require a fresh request after correcting the hosted template/redirect settings. Disable callback query-string capture in hosting/access logs and analytics; never send token hashes to telemetry. Callback responses use `no-store` and `no-referrer`.
 
 ## Profile provisioning and organization bootstrap
 
@@ -132,3 +132,9 @@ Added /change-password for authenticated users, independently of organization me
 A read-only invalid-token redirect diagnostic, using the exact deployed recovery callback as redirect_to, fell back to http://localhost:3000. This confirms that the hosted callback is not accepted under the current URL configuration; correcting the Supabase Site URL/allowed redirects is required. The available MCP tools do not expose that configuration endpoint. No diagnostic email was sent.
 
 Validation for the additional repair: 99 unit/route tests, 11 Chromium browser tests, typecheck, lint and production build. A temporary privileged owner-password operation, if executed, must use the supported Auth admin API with a fixed verified target, short-lived capability authentication and immediate disabling afterward. No raw API key may leave the Edge Function. Never store password values or recovery tokens in the repository or audit metadata.
+
+## Latest deployed recovery status
+
+Deployment dpl_96kqX7DWpQ4rzicVNoSzW7vMm62T (source d911dd22e64c49a15ac0e6c97b0d7fdd2053da15) is READY at the canonical MedIntel domain. The owner saved Supabase URL settings; repeating the same invalid-token diagnostic now redirects to the deployed /auth/callback rather than localhost. No email was sent by this diagnostic. The deployed /change-password route does not render a password-change form to an anonymous request and emits the server redirect to sign in.
+
+The requested temporary administrator password has not been set. Automatic approval review rejected the proposed short-lived server-side credential-reset helper because it would expose a high-impact privileged credential-control endpoint, despite its fixed account and capability checks. The helper was not deployed. Explicit approval of that mechanism was requested; no indirect password-table update or alternative execution bypass was attempted. Existing passwords, Auth identity and email confirmation are unchanged.
