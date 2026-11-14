@@ -36,13 +36,33 @@ vi.mock("@/app/actions/workflow-studio", () => ({
   }) => ({
     ok: true,
     task: {
-      id: "aft-test",
+      id: `aft-${input.sectionId}-${input.agentId}`,
       sectionId: input.sectionId,
       agentId: input.agentId,
       note: input.note,
       status: "open",
       createdAt: new Date().toISOString(),
       workflowId: input.workflowId,
+    },
+  })),
+  evaluateWalkthroughSectionAction: vi.fn(async (input: {
+    sectionId: string;
+    sectionTitle: string;
+    sectionBody: string;
+    agentId: string;
+  }) => ({
+    ok: true,
+    evaluation: {
+      sectionId: input.sectionId,
+      sectionTitle: input.sectionTitle,
+      agentId: input.agentId,
+      agentName: input.agentId,
+      headline: `Demo evaluation for ${input.sectionTitle}`,
+      findings: ["Illustrative finding only.", "Human oversight required."],
+      confidence: "provisional",
+      evidenceNotes: "Fixture-only evaluation.",
+      source: "fixture_compose",
+      evaluatedAt: new Date().toISOString(),
     },
   })),
 }));
@@ -116,5 +136,17 @@ describe("StructuredDeliverableView", () => {
     expect(
       await screen.findByText(/Evaluate “Visit Context”/i),
     ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("button", { name: /Run evaluation walkthrough/i }),
+    ).toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", { name: /Run evaluation walkthrough/i }),
+    );
+    expect(
+      await screen.findByText(/Demo evaluation for Visit Context/i),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("progressbar")).toBeInTheDocument();
   });
 });

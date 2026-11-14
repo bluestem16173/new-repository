@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { FileText, Package } from "lucide-react";
 import type { MockReportWorkflowId } from "@/domain/workflow-studio/mock-report";
 import { useAgentFollowUpTasks } from "@/hooks/use-agent-follow-up-tasks";
 import { AgentFollowUpTaskList } from "@/components/workflow-studio/agent-follow-up-task-list";
 import { DemoOversightBanner } from "@/components/workflow-studio/demo-oversight-banner";
+import { EvaluationWalkthroughPanel } from "@/components/workflow-studio/evaluation-walkthrough-panel";
 import {
   ReportSectionCard,
   type ReportSectionViewModel,
@@ -22,6 +24,7 @@ interface StructuredDeliverableViewProps {
   generatedAt?: string;
   disclaimer?: string;
   className?: string;
+  onHighlightAgent?: (agentId: string | null) => void;
 }
 
 export function StructuredDeliverableView({
@@ -33,14 +36,22 @@ export function StructuredDeliverableView({
   generatedAt,
   disclaimer,
   className,
+  onHighlightAgent,
 }: StructuredDeliverableViewProps) {
   const {
     tasks,
     error,
     addTask,
+    addTasks,
     toggleStatus,
     removeTask,
   } = useAgentFollowUpTasks(workflowId);
+  const [highlightedSectionId, setHighlightedSectionId] = useState<
+    string | null
+  >(null);
+
+  const showWalkthrough =
+    workflowId === "kol-meeting-prep" || workflowId === "manager-education";
 
   return (
     <div className={cn("space-y-5", className)}>
@@ -113,16 +124,41 @@ export function StructuredDeliverableView({
         </div>
       </header>
 
+      {showWalkthrough ? (
+        <EvaluationWalkthroughPanel
+          workflowId={workflowId}
+          reportTitle={title}
+          reportSummary={summary}
+          sections={sections}
+          existingTaskKeys={tasks.map((task) => ({
+            sectionId: task.sectionId,
+            agentId: task.agentId,
+          }))}
+          onAssignTasks={addTasks}
+          onHighlightAgent={onHighlightAgent}
+          onHighlightSection={setHighlightedSectionId}
+        />
+      ) : null}
+
       <div className="space-y-3">
         {sections.map((section, index) => (
-          <ReportSectionCard
+          <div
             key={section.id}
-            section={section}
-            index={index}
-            workflowId={workflowId}
-            reportTitle={title}
-            onAddTask={addTask}
-          />
+            id={`packet-section-${section.id}`}
+            className={cn(
+              "rounded-xl transition-shadow",
+              highlightedSectionId === section.id &&
+                "ring-2 ring-[#2563EB]/35 ring-offset-2",
+            )}
+          >
+            <ReportSectionCard
+              section={section}
+              index={index}
+              workflowId={workflowId}
+              reportTitle={title}
+              onAddTask={addTask}
+            />
+          </div>
         ))}
       </div>
 

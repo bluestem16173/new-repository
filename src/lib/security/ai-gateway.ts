@@ -9,6 +9,10 @@ export type AiOperatingMode = "demo" | "byok" | "enterprise";
 export const WORKFLOW_STUDIO_MOCK_REPORT_PURPOSE =
   "workflow_studio_mock_report" as const;
 
+/** Narrow purpose for per-section evaluation walkthrough notes. */
+export const WORKFLOW_STUDIO_SECTION_EVAL_PURPOSE =
+  "workflow_studio_section_evaluation" as const;
+
 const gatewayRequestSchema = z.object({
   agentId: z.string().min(1).max(80),
   purpose: z.string().min(1).max(200),
@@ -119,8 +123,12 @@ export async function authorizeAiGatewayRequest(
 
   const isWorkflowStudioMockReport =
     parsed.data.purpose === WORKFLOW_STUDIO_MOCK_REPORT_PURPOSE;
+  const isWorkflowStudioSectionEval =
+    parsed.data.purpose === WORKFLOW_STUDIO_SECTION_EVAL_PURPOSE;
+  const isWorkflowStudioAllowlistedPurpose =
+    isWorkflowStudioMockReport || isWorkflowStudioSectionEval;
 
-  if (isWorkflowStudioMockReport) {
+  if (isWorkflowStudioAllowlistedPurpose) {
     if (model === "openai:gpt-4.1-mini" && !hasOpenAiApiKey()) {
       return {
         ok: false,
@@ -131,7 +139,8 @@ export async function authorizeAiGatewayRequest(
     if (model !== "openai:gpt-4.1-mini" && model !== "demo-synthetic") {
       return {
         ok: false,
-        reason: "Workflow Studio mock reports only allow openai:gpt-4.1-mini or demo-synthetic.",
+        reason:
+          "Workflow Studio demo AI only allows openai:gpt-4.1-mini or demo-synthetic.",
       };
     }
   } else if (mode !== "demo" || model !== "demo-synthetic") {

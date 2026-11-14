@@ -328,9 +328,30 @@ export function WorkflowStudioApp() {
             workflowId={workflow.id}
             deliverable={workflow.deliverable}
             open={showDeliverable}
+            onHighlightAgent={(agentId) => {
+              if (!agentId || !workflow) {
+                return;
+              }
+              const match = workflow.nodes.find(
+                (node) => node.agentId === agentId,
+              );
+              setSelectedNodeId(match?.id ?? null);
+              setShowDeliverable(true);
+            }}
           />
 
-          <MockReportPanel workflowId={workflow.id} />
+          <MockReportPanel
+            workflowId={workflow.id}
+            onHighlightAgent={(agentId) => {
+              if (!agentId || !workflow) {
+                return;
+              }
+              const match = workflow.nodes.find(
+                (node) => node.agentId === agentId,
+              );
+              setSelectedNodeId(match?.id ?? null);
+            }}
+          />
         </section>
       ) : null}
     </div>

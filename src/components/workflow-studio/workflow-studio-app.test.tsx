@@ -65,6 +65,25 @@ vi.mock("@/app/actions/workflow-studio", () => ({
       createdAt: new Date().toISOString(),
     },
   })),
+  evaluateWalkthroughSectionAction: vi.fn(async (input: {
+    sectionId: string;
+    sectionTitle: string;
+    agentId: string;
+  }) => ({
+    ok: true,
+    evaluation: {
+      sectionId: input.sectionId,
+      sectionTitle: input.sectionTitle,
+      agentId: input.agentId,
+      agentName: input.agentId,
+      headline: `Eval ${input.sectionTitle}`,
+      findings: ["Demo finding"],
+      confidence: "illustrative",
+      evidenceNotes: "Demo only",
+      source: "fixture_compose",
+      evaluatedAt: new Date().toISOString(),
+    },
+  })),
 }));
 
 vi.mock("@/app/actions/data-room", () => ({

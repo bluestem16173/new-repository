@@ -13,9 +13,13 @@ import { Button } from "@/components/ui/button";
 
 interface MockReportPanelProps {
   workflowId: WorkflowStudioId;
+  onHighlightAgent?: (agentId: string | null) => void;
 }
 
-export function MockReportPanel({ workflowId }: MockReportPanelProps) {
+export function MockReportPanel({
+  workflowId,
+  onHighlightAgent,
+}: MockReportPanelProps) {
   const supported = isMockReportWorkflowId(workflowId);
   const [report, setReport] = useState<GeneratedMockReport | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -93,6 +97,7 @@ export function MockReportPanel({ workflowId }: MockReportPanelProps) {
             }
             generatedAt={report.generatedAt}
             disclaimer={report.oversightLabel}
+            onHighlightAgent={onHighlightAgent}
           />
         </div>
       ) : null}

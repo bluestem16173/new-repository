@@ -47,6 +47,7 @@ Pathway deliverables and **Generate mock report** share a polished packet UI:
 - **Evaluate with agent** / **Add to agent task** → demo follow-up task list (validated server-side, persisted in browser localStorage; clearly labeled demo)
 - Illustrative Demo / human oversight banners retained
 - **Send to Data Room** creates an auth-gated retrieval package for colleagues
+- **Run evaluation walkthrough** (KOL + Manager): auto-assigns each section to its primary owning agent, steps through short agent evaluations (fixture or OpenAI, evidence-only context), highlights the canvas agent node, then assembles a polished **Final Report** consolidating packet + evaluations (optional Data Room send)
 
 Mock report generation prefers structured JSON sections + `agentIds` from OpenAI (`response_format: json_object`), with graceful fixture-compose fallback.
 

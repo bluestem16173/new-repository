@@ -42,6 +42,28 @@ export function useAgentFollowUpTasks(workflowId?: string) {
     [persist],
   );
 
+  const addTasks = useCallback(
+    (inputs: CreateAgentFollowUpTaskInput[]) => {
+      if (inputs.length === 0) return;
+      setError(null);
+      startTransition(async () => {
+        const created: AgentFollowUpTask[] = [];
+        for (const input of inputs) {
+          const result = await createAgentFollowUpTaskAction(input);
+          if (!result.ok) {
+            setError(result.error);
+            break;
+          }
+          created.push(result.task);
+        }
+        if (created.length === 0) return;
+        const current = readFollowUpTasks();
+        persist([...created, ...current]);
+      });
+    },
+    [persist],
+  );
+
   const addLocalTask = useCallback(
     (input: CreateAgentFollowUpTaskInput) => {
       setError(null);
@@ -91,6 +113,7 @@ export function useAgentFollowUpTasks(workflowId?: string) {
     pending,
     error,
     addTask,
+    addTasks,
     addLocalTask,
     toggleStatus,
     removeTask,

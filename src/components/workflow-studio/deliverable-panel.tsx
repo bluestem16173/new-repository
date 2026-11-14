@@ -16,6 +16,7 @@ interface DeliverablePanelProps {
   workflowId: WorkflowStudioId;
   deliverable: WorkflowDeliverable;
   open: boolean;
+  onHighlightAgent?: (agentId: string | null) => void;
 }
 
 function toStructuredSections(deliverable: WorkflowDeliverable) {
@@ -31,6 +32,7 @@ export function DeliverablePanel({
   workflowId,
   deliverable,
   open,
+  onHighlightAgent,
 }: DeliverablePanelProps) {
   const panelRef = useRef<HTMLElement | null>(null);
 
@@ -72,6 +74,7 @@ export function DeliverablePanel({
           sections={toStructuredSections(deliverable)}
           sourceLabel="fixture packet"
           disclaimer={deliverable.disclaimer}
+          onHighlightAgent={onHighlightAgent}
         />
       ) : (
         <div className="space-y-4">
