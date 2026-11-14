@@ -63,7 +63,7 @@ describe("account registration and recovery", () => {
     mock.getCookie.mockReturnValue({ value: issueRecoveryMarker("recovering-user") });
     mock.getUser.mockResolvedValue({ data: { user: { id: "recovering-user" } } });
     mock.updateUser.mockResolvedValue({ error: null }); mock.signOut.mockResolvedValue({ error: null });
-    expect(await updatePasswordAction(valid)).toMatchObject({ ok: true, message: "Password updated. Sign in with your new password." });
+    expect(await updatePasswordAction(valid)).toMatchObject({ ok: true, destination: "/login?notice=password_updated", message: "Password updated. Sign in with your new password." });
     expect(mock.updateUser).toHaveBeenCalledWith({ password: valid.password });
     expect(mock.deleteCookie).toHaveBeenCalledWith("medintel-recovery");
     expect(mock.signOut).toHaveBeenCalledWith({ scope: "global" });
@@ -91,7 +91,7 @@ describe("password changes and legacy recovery", () => {
   it("changes passwords only with a verified user and current password, then signs out", async () => {
     mock.getUser.mockResolvedValue({ data: { user: { id: "changing-user" } }, error: null });
     mock.updateUser.mockResolvedValue({ error: null }); mock.signOut.mockResolvedValue({ error: null });
-    expect(await changePasswordAction({ currentPassword: "old-password", password: valid.password, confirmPassword: valid.password })).toMatchObject({ ok: true, message: "Password updated. Sign in with your new password." });
+    expect(await changePasswordAction({ currentPassword: "old-password", password: valid.password, confirmPassword: valid.password })).toMatchObject({ ok: true, destination: "/login?notice=password_updated", message: "Password updated. Sign in with your new password." });
     expect(mock.updateUser).toHaveBeenCalledWith({ password: valid.password, current_password: "old-password" });
     expect(mock.signOut).toHaveBeenCalledWith({ scope: "global" });
   });

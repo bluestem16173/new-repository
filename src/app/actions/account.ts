@@ -77,7 +77,7 @@ export async function updatePasswordAction(raw: unknown): Promise<AccountResult>
   cookieStore.delete("medintel-recovery");
   const { error: signOutError } = await client.auth.signOut({ scope: "global" });
   if (signOutError) return { ok: true, message: "Password updated. Sign out and sign in again to continue." };
-  return { ok: true, message: "Password updated. Sign in with your new password." };
+  return { ok: true, destination: "/login?notice=password_updated", message: "Password updated. Sign in with your new password." };
 }
 
 export async function signInWithPasswordAction(email: string, password: string, next: string, captchaToken?: string): Promise<AccountResult> {
@@ -123,6 +123,6 @@ export async function changePasswordAction(raw: unknown): Promise<AccountResult>
     if (error) return { ok: false, error: "Password could not be changed. Check your current password and try a different new password." };
     (await cookies()).delete("medintel-recovery");
     const { error: signOutError } = await client.auth.signOut({ scope: "global" });
-    return { ok: true, message: signOutError ? "Password updated. Sign out and sign in again to continue." : "Password updated. Sign in with your new password." };
+    return { ok: true, destination: signOutError ? undefined : "/login?notice=password_updated", message: signOutError ? "Password updated. Sign out and sign in again to continue." : "Password updated. Sign in with your new password." };
   } catch { return { ok: false, error: "Password could not be changed. Try again later." }; }
 }

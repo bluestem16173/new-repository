@@ -21,7 +21,7 @@ export function LoginForm() {
   const [captchaToken, setCaptchaToken] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(urlError);
-  const [info, setInfo] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(searchParams.get("notice") === "password_updated" ? "Password updated. Sign in with your new password." : null);
   const [pending, startTransition] = useTransition();
 
   function onPasswordSubmit(event: React.FormEvent) {

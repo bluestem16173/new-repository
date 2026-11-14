@@ -113,7 +113,7 @@ describe("auth callback and session enforcement", () => {
     expect(response.cookies.get("session")?.value).toBe("recovery-session");
     state.marker = response.cookies.get("medintel-recovery")?.value;
     const updated = await updatePasswordAction({ password: "new-secure-password", confirmPassword: "new-secure-password" });
-    expect(updated).toMatchObject({ ok: true, message: "Password updated. Sign in with your new password." });
+    expect(updated).toMatchObject({ ok: true, destination: "/login?notice=password_updated", message: "Password updated. Sign in with your new password." });
     expect(state.updateUser).toHaveBeenCalledWith({ password: "new-secure-password" });
     expect(state.signOut).toHaveBeenCalledWith({ scope: "global" });
     state.signInWithPassword.mockResolvedValueOnce({ error: null }).mockResolvedValueOnce({ error: { code: "invalid_credentials" } });
