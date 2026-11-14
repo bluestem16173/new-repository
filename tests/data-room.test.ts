@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import type { User } from "@/domain/types";
 import {
   getAccessibleDataRoomPackage,
+  isDataRoomSchemaMissingError,
   listAccessibleDataRoomPackages,
   sendPackageToDataRoom,
 } from "@/services/data-room/packages";
@@ -74,6 +75,22 @@ describe("data room packages", () => {
       user: stranger,
     });
     expect(strangerList.map((item) => item.id)).not.toContain(pkg.id);
+  });
+
+  it("detects PostgREST schema-cache missing-table errors", () => {
+    expect(
+      isDataRoomSchemaMissingError({
+        code: "PGRST205",
+        message:
+          "Could not find the table 'public.data_room_packages' in the schema cache",
+      }),
+    ).toBe(true);
+    expect(
+      isDataRoomSchemaMissingError({
+        code: "42501",
+        message: "permission denied for table data_room_packages",
+      }),
+    ).toBe(false);
   });
 
   it("denies package detail to users outside access list", async () => {

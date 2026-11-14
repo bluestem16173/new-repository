@@ -49,6 +49,52 @@ function mapRow(row: Record<string, unknown>): DataRoomPackage {
   };
 }
 
+/** PostgREST missing-relation / schema-cache errors for unapplied migration 013. */
+export function isDataRoomSchemaMissingError(
+  error: { message?: string; code?: string } | null | undefined,
+): boolean {
+  if (!error) return false;
+  const message = (error.message ?? "").toLowerCase();
+  const code = error.code ?? "";
+  return (
+    code === "PGRST205" ||
+    code === "42P01" ||
+    message.includes("schema cache") ||
+    message.includes("could not find the table") ||
+    (message.includes("data_room_packages") &&
+      message.includes("does not exist")) ||
+    (message.includes("relation") && message.includes("data_room"))
+  );
+}
+
+function saveDemoPackage(input: {
+  user: User;
+  payload: SendToDataRoomInput;
+  accessEmails: string[];
+  reason: string;
+}): DataRoomPackage {
+  const now = new Date().toISOString();
+  const pkg: DataRoomPackage = {
+    id: createPackageId(),
+    title: input.payload.title.trim(),
+    summary: input.payload.summary.trim(),
+    workflowType: input.payload.workflowType,
+    sections: input.payload.sections,
+    demoLabel: `${DATA_ROOM_DEMO_NOTICE} Fallback: ${input.reason}`,
+    oversightLabel: DATA_ROOM_OVERSIGHT_LABEL,
+    senderId: input.user.id,
+    senderEmail: input.user.email,
+    senderDisplayName: input.user.fullName,
+    accessEmails: input.accessEmails,
+    organizationId: null,
+    createdAt: now,
+    updatedAt: now,
+    persistence: "demo_memory",
+  };
+  demoSaveDataRoomPackage(pkg);
+  return pkg;
+}
+
 export async function sendPackageToDataRoom(input: {
   user: User;
   payload: SendToDataRoomInput;
@@ -58,24 +104,12 @@ export async function sendPackageToDataRoom(input: {
   const membership = await getCurrentUserOrganization();
 
   if (getRuntimeMode() === "demo") {
-    const pkg: DataRoomPackage = {
-      id: createPackageId(),
-      title: input.payload.title.trim(),
-      summary: input.payload.summary.trim(),
-      workflowType: input.payload.workflowType,
-      sections: input.payload.sections,
-      demoLabel: DATA_ROOM_DEMO_NOTICE,
-      oversightLabel: DATA_ROOM_OVERSIGHT_LABEL,
-      senderId: input.user.id,
-      senderEmail: input.user.email,
-      senderDisplayName: input.user.fullName,
+    const pkg = saveDemoPackage({
+      user: input.user,
+      payload: input.payload,
       accessEmails,
-      organizationId: null,
-      createdAt: now,
-      updatedAt: now,
-      persistence: "demo_memory",
-    };
-    demoSaveDataRoomPackage(pkg);
+      reason: "demo runtime (in-memory only).",
+    });
     await recordSecurityAuditEvent({
       actorId: input.user.id,
       eventType: "data_room.package_created",
@@ -114,6 +148,30 @@ export async function sendPackageToDataRoom(input: {
     })
     .select("*")
     .single();
+
+  if (isDataRoomSchemaMissingError(error)) {
+    const pkg = saveDemoPackage({
+      user: input.user,
+      payload: input.payload,
+      accessEmails,
+      reason:
+        "public.data_room_packages missing (apply migration 013_data_room_packages.sql). Session-local only until migration is applied.",
+    });
+    await recordSecurityAuditEvent({
+      actorId: input.user.id,
+      eventType: "data_room.package_created_fallback",
+      resourceType: "data_room_package",
+      resourceId: pkg.id,
+      outcome: "success",
+      metadata: {
+        workflowType: pkg.workflowType,
+        persistence: "demo_memory",
+        fallback: "schema_missing",
+        inviteCount: accessEmails.length,
+      },
+    });
+    return pkg;
+  }
 
   if (error || !data) {
     throw new Error(
@@ -164,11 +222,25 @@ export async function listAccessibleDataRoomPackages(input: {
     .select("*")
     .order("created_at", { ascending: false });
 
+  if (isDataRoomSchemaMissingError(error)) {
+    return demoAccessiblePackagesFor({
+      userId: input.user.id,
+      email: input.user.email,
+    });
+  }
+
   if (error) {
     throw new Error(error.message);
   }
 
-  return (data ?? []).map((row) => mapRow(row as Record<string, unknown>));
+  const remote = (data ?? []).map((row) => mapRow(row as Record<string, unknown>));
+  const local = demoAccessiblePackagesFor({
+    userId: input.user.id,
+    email: input.user.email,
+  });
+  // Merge any session fallback packages when remote schema is partial.
+  const ids = new Set(remote.map((pkg) => pkg.id));
+  return [...remote, ...local.filter((pkg) => !ids.has(pkg.id))];
 }
 
 export async function getAccessibleDataRoomPackage(input: {
@@ -185,6 +257,15 @@ export async function getAccessibleDataRoomPackage(input: {
     return allowed ? pkg : null;
   }
 
+  const local = demoGetDataRoomPackage(input.packageId);
+  if (local) {
+    const allowed = demoAccessiblePackagesFor({
+      userId: input.user.id,
+      email: input.user.email,
+    }).some((item) => item.id === local.id);
+    if (allowed) return local;
+  }
+
   const supabase = await createSupabaseServerClient();
   if (!supabase) {
     throw new Error("Supabase client unavailable for Data Room.");
@@ -195,6 +276,10 @@ export async function getAccessibleDataRoomPackage(input: {
     .select("*")
     .eq("id", input.packageId)
     .maybeSingle();
+
+  if (isDataRoomSchemaMissingError(error)) {
+    return null;
+  }
 
   if (error) {
     throw new Error(error.message);

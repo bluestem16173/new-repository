@@ -28,11 +28,13 @@ export function SendToDataRoomButton({
   );
   const [error, setError] = useState<string | null>(null);
   const [packageId, setPackageId] = useState<string | null>(null);
+  const [persistenceNote, setPersistenceNote] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   function onSend() {
     setError(null);
     setPackageId(null);
+    setPersistenceNote(null);
     const accessEmails = emails
       .split(/[,;\s]+/)
       .map((value) => value.trim())
@@ -58,6 +60,11 @@ export function SendToDataRoomButton({
       }
 
       setPackageId(result.package.id);
+      if (result.package.persistence === "demo_memory") {
+        setPersistenceNote(
+          "Saved to demo memory (Data Room tables missing or demo mode). Apply migration 013 for durable org-shared packages.",
+        );
+      }
       setOpen(false);
     });
   }
@@ -121,15 +128,22 @@ export function SendToDataRoomButton({
       ) : null}
 
       {packageId ? (
-        <p className="text-[12px] text-[#17212B]/70" role="status">
-          Package sent.{" "}
-          <Link
-            href={`/data-room/${packageId}`}
-            className="font-medium text-[#2563EB] hover:underline"
-          >
-            Open in Data Room
-          </Link>
-        </p>
+        <div className="space-y-1" role="status">
+          <p className="text-[12px] text-[#17212B]/70">
+            Package sent.{" "}
+            <Link
+              href={`/data-room/${packageId}`}
+              className="font-medium text-[#2563EB] hover:underline"
+            >
+              Open in Data Room
+            </Link>
+          </p>
+          {persistenceNote ? (
+            <p className="text-[11px] leading-relaxed text-amber-900">
+              {persistenceNote}
+            </p>
+          ) : null}
+        </div>
       ) : null}
     </div>
   );
