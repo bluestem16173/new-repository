@@ -76,6 +76,39 @@ test.describe("MedIntel smoke", () => {
     ).toBeVisible();
   });
 
+  test("Visual Workflow Studio role dashboard and demo pathway navigate", async ({
+    page,
+  }) => {
+    await page.goto("/workflow-studio");
+    await expect(
+      page.getByRole("main").getByRole("heading", { name: "Visual Workflow Studio" }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("Demo Preview — No Live Agent Execution"),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Role dashboard" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("navigation", { name: "Primary", exact: true }).getByRole("link", {
+        name: /Workflow Studio/i,
+      }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Explore Demo Workflow" }).click();
+    await expect(
+      page.getByRole("heading", { name: "KOL Meeting Prep" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("application", { name: /KOL Meeting Prep pathway canvas/i }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "View deliverable" }).click();
+    await expect(
+      page.getByRole("heading", {
+        name: /KOL Meeting Prep Packet/i,
+      }),
+    ).toBeVisible();
+  });
+
   test("Scientific Knowledge Network search and item detail navigate", async ({
     page,
   }) => {
