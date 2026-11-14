@@ -1,8 +1,21 @@
 import { z } from "zod";
 import { recordSecurityAuditEvent } from "@/lib/security/audit";
+import { hasOpenAiApiKey } from "@/lib/security/openai-env";
 import { getRuntimeMode } from "@/lib/supabase/env";
 
 export type AiOperatingMode = "demo" | "byok" | "enterprise";
+
+/** Narrow purpose for Workflow Studio illustrative mock reports (RAG over fixtures). */
+export const WORKFLOW_STUDIO_MOCK_REPORT_PURPOSE =
+  "workflow_studio_mock_report" as const;
+
+/** Narrow purpose for per-section evaluation walkthrough notes. */
+export const WORKFLOW_STUDIO_SECTION_EVAL_PURPOSE =
+  "workflow_studio_section_evaluation" as const;
+
+/** Narrow purpose for live Data Room package generation via OpenAI. */
+export const DATA_ROOM_LIVE_PACKAGE_PURPOSE =
+  "data_room_live_package" as const;
 
 const gatewayRequestSchema = z.object({
   agentId: z.string().min(1).max(80),
@@ -112,8 +125,38 @@ export async function authorizeAiGatewayRequest(
     }
   }
 
-  if (mode !== "demo" || model !== "demo-synthetic") {
-    return { ok: false, reason: "Live AI execution is unavailable until authenticated durable budgets, provider execution, and usage accounting are implemented." };
+  const isWorkflowStudioMockReport =
+    parsed.data.purpose === WORKFLOW_STUDIO_MOCK_REPORT_PURPOSE;
+  const isWorkflowStudioSectionEval =
+    parsed.data.purpose === WORKFLOW_STUDIO_SECTION_EVAL_PURPOSE;
+  const isDataRoomLivePackage =
+    parsed.data.purpose === DATA_ROOM_LIVE_PACKAGE_PURPOSE;
+  const isWorkflowStudioAllowlistedPurpose =
+    isWorkflowStudioMockReport ||
+    isWorkflowStudioSectionEval ||
+    isDataRoomLivePackage;
+
+  if (isWorkflowStudioAllowlistedPurpose) {
+    if (model === "openai:gpt-4.1-mini" && !hasOpenAiApiKey()) {
+      return {
+        ok: false,
+        reason:
+          "OpenAI API key is not configured on the server (OPENAI_API_KEY or OPENAI_API_Key).",
+      };
+    }
+    if (model !== "openai:gpt-4.1-mini" && model !== "demo-synthetic") {
+      return {
+        ok: false,
+        reason:
+          "Workflow Studio demo AI only allows openai:gpt-4.1-mini or demo-synthetic.",
+      };
+    }
+  } else if (mode !== "demo" || model !== "demo-synthetic") {
+    return {
+      ok: false,
+      reason:
+        "Live AI execution is unavailable until authenticated durable budgets, provider execution, and usage accounting are implemented.",
+    };
   }
 
   const usage = getUsage();

@@ -22,6 +22,21 @@ No live email delivery, password replacement, session persistence against Supaba
 1. Configure Supabase Auth rate limits for signup, password recovery, sign-in, and token verification. Enable Turnstile abuse protection for public registration and recovery. Put its secret only in the Supabase dashboard; set the matching public site key as `NEXT_PUBLIC_TURNSTILE_SITE_KEY` in the application. Allow the actual application hostname in Turnstile.
 1. Restart/rebuild after changing public environment settings. Do not commit `.env.local`.
 
+### Vercel Preview and Production environment parity
+
+Vercel Preview deployments use `NODE_ENV=production`. If `NEXT_PUBLIC_SUPABASE_URL` and a publishable/anon key are missing (or only partially set), the edge proxy returns **503** with the names of the missing variables — not an open demo of the full app.
+
+**Required for Auth on Preview and Production** (set in Vercel → Project → Settings → Environment Variables, enable both Preview and Production, then redeploy):
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
+- `NEXT_PUBLIC_SITE_URL` (canonical HTTPS origin for that environment)
+- `MEDINTEL_AUTH_RECOVERY_SECRET` (server-only; recovery cookies)
+
+**Exception:** when public Supabase env is **fully unset**, `/workflow-studio` alone is allowed in illustrative demo-read mode. That is not an Auth bypass: when Supabase env **is** present, Workflow Studio requires a session like other app routes. See `docs/VISUAL_WORKFLOW_STUDIO.md`.
+
+Never commit secret values. Prefer copying the same public Supabase keys already used by Production into Preview rather than inventing new ones.
+
 ## Recovery email templates: choose a supported format
 
 ### PKCE default

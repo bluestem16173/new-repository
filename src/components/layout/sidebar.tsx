@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Archive,
   BookOpen,
   Bot,
   BriefcaseMedical,
+  GitBranchPlus,
   LayoutDashboard,
   Network,
   Settings,
@@ -26,6 +28,18 @@ const NAV_ITEMS: Array<{
     href: "/dashboard",
     label: "Dashboard",
     icon: LayoutDashboard,
+  },
+  {
+    href: "/workflow-studio",
+    label: "Workflow Studio",
+    icon: GitBranchPlus,
+    badge: "Demo",
+  },
+  {
+    href: "/data-room",
+    label: "Data Room",
+    icon: Archive,
+    badge: "Demo",
   },
   {
     href: "/knowledge",

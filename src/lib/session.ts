@@ -39,9 +39,10 @@ export async function getCurrentUser(): Promise<User> {
   if (!profile) {
     throw new Error("Account not provisioned. Ask an administrator to assign a profile and organization membership.");
   }
-  const membership = await getCurrentUserOrganization();
-  if (membership.error) throw new Error(membership.error);
 
+  // Organization membership is enforced by the edge proxy for non-demo routes and
+  // by service-layer checks. Pending-org profiles may still use Illustrative Demo
+  // surfaces (Workflow Studio / Data Room / Agents) after Auth.
   return {
     id: profile.id as string,
     email: profile.email as string,

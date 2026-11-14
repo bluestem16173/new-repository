@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { LoginDemoSurfaceNote } from "@/components/auth/login-demo-surface-note";
 import { LoginForm } from "@/components/auth/login-form";
 import { getRuntimeMode } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -31,6 +32,9 @@ export default function LoginPage() {
           Medical Affairs workspaces require an authenticated Supabase session
           when the project is connected.
         </p>
+        <Suspense fallback={null}>
+          <LoginDemoSurfaceNote />
+        </Suspense>
       </div>
 
       <nav className="flex gap-4 text-sm text-[#2563EB]" aria-label="Account options"><a href="/register">Create account</a><a href="/forgot-password">Forgot password</a></nav>

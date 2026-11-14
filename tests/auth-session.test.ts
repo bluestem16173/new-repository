@@ -94,6 +94,16 @@ describe("auth callback and session enforcement", () => {
     expect(response.headers.get("location")).toBe("https://medintel.example/onboarding");
     expect(response.cookies.get("session")?.value).toBe("refreshed");
   });
+  it("allows pending-org users on illustrative demo surfaces", async () => {
+    state.user = { id: "pending-user" };
+    state.profile = true;
+    const response = await proxy(
+      new NextRequest("https://medintel.example/workflow-studio"),
+    );
+    expect(response.headers.get("location")).toBeNull();
+    expect(response.headers.get("x-medintel-org-status")).toBe("pending");
+    expect(response.cookies.get("session")?.value).toBe("refreshed");
+  });
   it("rejects profiles that do not have a matching membership", async () => {
     state.user = { id: "user-1" }; state.profile = true;
     const response = await proxy(new NextRequest("https://medintel.example/knowledge"));
