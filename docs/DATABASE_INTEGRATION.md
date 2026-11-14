@@ -33,3 +33,9 @@ Workflow status, review decision and audit inserts are still separate transactio
 ## Required staging verification
 
 Apply reviewed migrations only after explicit approval, in order. Validate FKs/indexes against the actual deployed schema and run rollback/recovery rehearsal in staging. Use two tenants, an MSL, a reviewer, a director, an unprovisioned account and an anonymous request. Verify self-role updates fail, missing memberships fail, cross-tenant restricted reads/writes fail, audit updates/deletes fail and self-approval fails. Verify child tables independently, including direct REST requests. Do not treat a service-role query as an RLS test.
+
+## Subsequent live read-only verification
+
+The connected Supabase project has 54 public tables with RLS enabled, including 111 inquiries and 45 knowledge items, all assigned a tenant. There are five Auth identities, four profiles, four memberships and two organizations. Migration history is empty even though the tables exist; do not replay 001–009 or assert the historical application method is known. The live schema includes policy/helper modifications beyond the repository's original migrations.
+
+Actual schema TypeScript types were generated into src/lib/supabase/database.types.ts. Proposed migrations 010–012 passed the isolated PostgreSQL 17 harness (npm run test:database-auth with the documented network-disabled container). This supersedes the earlier statement that no schema types or SQL-execution evidence were available. Production migrations remain unapplied, and managed-tool read results are not authenticated-session RLS proof.

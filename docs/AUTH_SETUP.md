@@ -87,3 +87,20 @@ The current MedIntel Vercel origin is `https://medintel-sigma.vercel.app`. Set S
 - `https://medintel-sigma.vercel.app/auth/callback?next=/dashboard`
 
 For the optional direct token-hash recovery email template, use `https://medintel-sigma.vercel.app/auth/callback?token_hash={{ .TokenHash }}&type=recovery` as the recovery link. These Supabase administrative settings were not changed during the deployment.
+
+## Live database inspection and pending repair
+
+After Supabase was connected, read-only inspection confirmed five Auth identities and four profiles; one confirmed email identity lacks a profile. The live membership policy self-references organization_memberships and no signup profile trigger exists. Existing profiles all have matching memberships. Do not identify the missing profile with a particular email without checking its ownership.
+
+The proposed repair is migrations 010, 011 and 012 in order. Migration 012 backfills only missing public.profiles rows as MSL with no organization; it does not create Auth users, elevate roles or grant access. Production execution still requires explicit approval. Their local PostgreSQL 17 integration tests pass, including RLS checks as authenticated, not service_role.
+
+Reproduce safely in an isolated local container:
+
+```bash
+docker run --detach --name medintel-auth-db-verify --network none --env POSTGRES_HOST_AUTH_METHOD=trust postgres:17-alpine@sha256:d3244e8ce3f165ee3c93d9c4a4b1d0fe48b3a89e2287b717fdcbbde92d405065
+MEDINTEL_TEST_DB_CONTAINER=medintel-auth-db-verify npm run test:database-auth
+```
+
+The test harness refuses containers with network access. Auth tables and identities in this fixture are test stand-ins; no hosted Auth users are inserted. Each run uses a new local test database.
+
+Auth logs confirmed repeated over_email_send_rate_limit errors. The connected Supabase tools do not expose hosted Auth configuration updates. Configure custom SMTP and exact redirects in the dashboard links in PR_CONSOLIDATION.md; do not disable confirmation or rely on changing the recipient email to avoid a project quota.
