@@ -1,0 +1,2 @@
+import { AccountForm } from "@/components/auth/account-form";
+export default function Page() { return <main className="mx-auto flex min-h-screen w-full max-w-lg flex-col justify-center gap-6 px-6 py-12"><div className="space-y-2"><p className="text-sm font-semibold text-[#2563EB]">MedIntel</p><h1 className="text-2xl font-semibold tracking-tight text-[#17212B]">Reset your password</h1><p className="text-sm leading-relaxed text-slate-600">Request a secure password reset link by email.</p></div><AccountForm view="forgot" /></main>; }

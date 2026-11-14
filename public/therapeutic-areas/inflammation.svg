@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200" viewBox="0 0 320 200" role="img" aria-label="Inflammation abstract illustration">
+  <rect width="320" height="200" fill="#F8FAFC"/>
+  <path d="M40 150 C80 40, 120 40, 160 150 C200 40, 240 40, 280 150" fill="none" stroke="#0F9D92" stroke-width="10" stroke-linecap="round"/>
+  <rect x="48" y="158" width="224" height="10" rx="5" fill="#E5E7EB"/>
+  <circle cx="96" cy="96" r="10" fill="#2563EB"/>
+  <circle cx="176" cy="72" r="8" fill="#17212B" opacity="0.7"/>
+  <circle cx="240" cy="104" r="9" fill="#0F9D92"/>
+</svg>

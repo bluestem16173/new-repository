@@ -1,0 +1,69 @@
+{
+  "note": "Stable IDs from supplied MedIntel agent icon pack. Mockup statuses are illustrative; runtime status is derived from functionality.",
+  "agents": [
+    {
+      "id": "literature-scout",
+      "icon": "literature-scout.v2.png"
+    },
+    {
+      "id": "evidence-analyst",
+      "icon": "evidence-analyst.v2.png"
+    },
+    {
+      "id": "citation-auditor",
+      "icon": "citation-auditor.v2.png"
+    },
+    {
+      "id": "medical-drafting",
+      "icon": "medical-drafting.v2.png"
+    },
+    {
+      "id": "inquiry-triage",
+      "icon": "inquiry-triage.v2.png"
+    },
+    {
+      "id": "kol-simulator",
+      "icon": "kol-simulator.v2.png"
+    },
+    {
+      "id": "scientific-examiner",
+      "icon": "scientific-examiner.v2.png"
+    },
+    {
+      "id": "coaching-advisor",
+      "icon": "coaching-advisor.v2.png"
+    },
+    {
+      "id": "scenario-builder",
+      "icon": "scenario-builder.v2.png"
+    },
+    {
+      "id": "evidence-watch",
+      "icon": "evidence-watch.v2.png"
+    },
+    {
+      "id": "pharmacovigilance",
+      "icon": "pharmacovigilance.v2.png"
+    },
+    {
+      "id": "case-completeness",
+      "icon": "case-completeness.v2.png"
+    },
+    {
+      "id": "bottleneck-analyst",
+      "icon": "bottleneck-analyst.v2.png"
+    },
+    {
+      "id": "leadership-briefing",
+      "icon": "leadership-briefing.v2.png"
+    },
+    {
+      "id": "protocol-intelligence",
+      "icon": "protocol-intelligence.v2.png"
+    },
+    {
+      "id": "knowledge-matcher",
+      "icon": "citation-auditor.v2.png"
+    }
+  ]
+}

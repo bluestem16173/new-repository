@@ -1,0 +1,12 @@
+# MedIntel Supabase project config (CLI).
+# Migrations live in supabase/migrations/ and are version-controlled.
+# Do NOT apply remotely until an approved deployment method is available
+# (Dashboard SQL Editor or authenticated Supabase CLI — MCP OAuth is not used).
+
+project_id = "gnrkhekyjhfbisvsxowc"
+
+[api]
+enabled = true
+
+[db]
+major_version = 15
